@@ -22,19 +22,19 @@ class Model {
                     boundaryRegExp TEXT,
                     periodicity TEXT,
                     label TEXT,
-                    active BOOLEAN,
+                    isActive BOOLEAN,
                     tags TEXT
                 )
             `);
 			this.db.run(`
                 CREATE TABLE IF NOT EXISTS execution_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    websiteId INTEGER,
+                    websiteRecordId INTEGER,
                     status TEXT,
-                    start_time DATETIME,
-                    end_time DATETIME,
-                    number_of_sites_crawled INTEGER,
-                    FOREIGN KEY (websiteId) REFERENCES website_records(id) ON DELETE CASCADE
+                    startTime DATETIME,
+                    endTime DATETIME,
+                    crawledCount INTEGER,
+                    FOREIGN KEY (websiteRecordId) REFERENCES website_records(id) ON DELETE CASCADE
                 )
             `);
 
@@ -43,9 +43,9 @@ class Model {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     executionId INTEGER,
                     url TEXT,
-                    crawl_time DATETIME,
+                    crawlTime DATETIME,
                     title TEXT,
-                    outgoing_links TEXT,
+                    outgoingLinks TEXT,
                     FOREIGN KEY (executionId) REFERENCES execution_records(id) ON DELETE CASCADE
                 )
             `);
@@ -98,13 +98,14 @@ class Model {
 		});
 	}
 
-	addWebsiteRecord(url, boundaryRegExp, periodicity, label, active, tags) {
+	addWebsiteRecord({ url, boundaryRegExp, periodicity, label, isActive, tags }) {
+		console.log(url);
 		this.db.serialize(() => {
 			const stmt = this.db.prepare(`
-                INSERT INTO website_records (url, boundaryRegExp, periodicity, label, active, tags)
+                INSERT INTO website_records (url, boundaryRegExp, periodicity, label, isActive, tags)
                 VALUES (?, ?, ?, ?, ?, ?)
             `);
-			stmt.run(url, boundaryRegExp, periodicity, label, active, JSON.stringify(tags));
+			stmt.run(url, boundaryRegExp, periodicity, label, isActive, JSON.stringify(tags));
 			stmt.finalize();
 		});
 	}
@@ -112,7 +113,7 @@ class Model {
 	addExecution(websiteId, status, startTime, endTime, numberOfSitesCrawled) {
 		this.db.serialize(() => {
 			const stmt = this.db.prepare(`
-                INSERT INTO execution_records (websiteId, status, start_time, end_time, number_of_sites_crawled)
+                INSERT INTO execution_records (websiteRecordId, status, startTime, endTime, crawledCount)
                 VALUES (?, ?, ?, ?, ?)
             `);
 			stmt.run(websiteId, status, startTime, endTime, numberOfSitesCrawled);
@@ -123,7 +124,7 @@ class Model {
 	addCrawledData(executionId, url, crawlTime, title, outgoingLinks) {
 		this.db.serialize(() => {
 			const stmt = this.db.prepare(`
-                INSERT INTO crawled_data (executionId, url, crawl_time, title, outgoing_links)
+                INSERT INTO crawled_data (executionId, url, crawlTime, title, outgongLinks)
                 VALUES (?, ?, ?, ?, ?)
             `);
 			stmt.run(executionId, url, crawlTime, title, JSON.stringify(outgoingLinks));

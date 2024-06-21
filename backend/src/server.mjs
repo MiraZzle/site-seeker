@@ -3,8 +3,12 @@ import http from "http";
 import { WebSocketServer } from "ws";
 import Model from "./models/model.mjs";
 import sqlite3 from "sqlite3";
+import AdditionController from "./controllers/additionController.mjs";
+import DataFormatter from "./utils/dataFormatter.mjs";
+import CrawlerManager from "./crawlers/crawlerManager.mjs";
 
 // Express application
+const crawlerManager = new CrawlerManager();
 const db = new sqlite3.Database("./src/db/crawler.db");
 const model = new Model(db);
 const app = express();
@@ -13,6 +17,7 @@ const wsServer = new WebSocketServer({ server });
 const port = 3000;
 
 // Middleware to parse JSON data
+app.use(express.json());
 
 // Root API endpoint
 app.get("/", (req, res) => {
@@ -30,7 +35,13 @@ app.get("/api/websiteRecords/", async (req, res) => {
 	}
 });
 
-app.post("/api/websiteRecords/add", (req, res) => {});
+app.post("/api/websiteRecords/add", (req, res) => {
+	const additionController = new AdditionController(model);
+	const websiteRecordTemp = req.body;
+	const websiteRecord = DataFormatter.getRecordFromJson(websiteRecordTemp);
+	additionController.addWebsiteRecord(websiteRecord, crawlerManager);
+	res.status(200).json({ message: "Website record added" });
+});
 
 app.delete("/api/websiteRecords/delete/:id", (req, res) => {});
 
