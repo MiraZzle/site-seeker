@@ -8,9 +8,9 @@ import DataFormatter from "./utils/dataFormatter.mjs";
 import CrawlerManager from "./crawlers/crawlerManager.mjs";
 
 // Express application
-const crawlerManager = new CrawlerManager();
 const db = new sqlite3.Database("./src/db/crawler.db");
 const model = new Model(db);
+const crawlerManager = new CrawlerManager(model);
 const app = express();
 const server = http.createServer(app);
 const wsServer = new WebSocketServer({ server });

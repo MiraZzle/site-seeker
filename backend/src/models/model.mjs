@@ -8,13 +8,13 @@ class Model {
 			label: row.label,
 			active: row.active,
 			tags: JSON.parse(row.tags),
+			isBeingCrawled: row.isBeingCrawled,
 		}));
 	}
 
 	constructor(db) {
 		this.db = db;
 		this.db.serialize(() => {
-			// Create the tables if they do not exist
 			this.db.run(`
                 CREATE TABLE IF NOT EXISTS website_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,20 +23,20 @@ class Model {
                     periodicity TEXT,
                     label TEXT,
                     isActive BOOLEAN,
-                    tags TEXT
+                    tags TEXT,
+					isBeingCrawled BOOLEAN DEFAULT 0
                 )
             `);
 			this.db.run(`
                 CREATE TABLE IF NOT EXISTS execution_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     websiteRecordId INTEGER,
-                    status TEXT,
                     startTime DATETIME,
                     endTime DATETIME,
                     crawledCount INTEGER,
                     FOREIGN KEY (websiteRecordId) REFERENCES website_records(id) ON DELETE CASCADE
                 )
-            `);
+				`);
 
 			this.db.run(`
                 CREATE TABLE IF NOT EXISTS crawled_data (
@@ -50,6 +50,52 @@ class Model {
                 )
             `);
 		});
+	}
+
+	async addWebsiteRecord({
+		url,
+		boundaryRegExp,
+		periodicity,
+		label,
+		isActive,
+		tags,
+		isBeingCrawled,
+	}) {
+		const lastID = await new Promise((resolve, reject) => {
+			this.db.serialize(() => {
+				const stmt = this.db.prepare(`
+                    INSERT INTO website_records (url, boundaryRegExp, periodicity, label, isActive, tags, isBeingCrawled)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                `);
+				stmt.run(
+					url,
+					boundaryRegExp,
+					periodicity,
+					label,
+					isActive,
+					JSON.stringify(tags),
+					isBeingCrawled,
+					function (err) {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(this.lastID);
+						}
+					}
+				);
+				stmt.finalize();
+			});
+		});
+		return {
+			id: lastID,
+			url,
+			boundaryRegExp,
+			periodicity,
+			label,
+			isActive,
+			tags,
+			isBeingCrawled,
+		};
 	}
 
 	async getAllWebsiteRecords() {
@@ -71,22 +117,25 @@ class Model {
 		}
 	}
 
-	async getWebsiteRecordById(id) {
+	async toggleIsBeingCrawled(id) {
 		try {
-			let row = await new Promise((resolve, reject) => {
-				this.db.get("SELECT * FROM website_records WHERE id = ?", [id], (err, row) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(row);
+			await new Promise((resolve, reject) => {
+				this.db.run(
+					"UPDATE website_records SET isBeingCrawled = NOT isBeingCrawled WHERE id = ?",
+					[id],
+					function (err) {
+						if (err) {
+							reject(err);
+						} else {
+							resolve();
+						}
 					}
-				});
+				);
 			});
-			const result = Model.parseRows([row]);
-			return result[0];
+			return true;
 		} catch (err) {
 			console.error(err);
-			return null;
+			return false;
 		}
 	}
 
@@ -98,33 +147,36 @@ class Model {
 		});
 	}
 
-	addWebsiteRecord({ url, boundaryRegExp, periodicity, label, isActive, tags }) {
-		console.log(url);
-		this.db.serialize(() => {
-			const stmt = this.db.prepare(`
-                INSERT INTO website_records (url, boundaryRegExp, periodicity, label, isActive, tags)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `);
-			stmt.run(url, boundaryRegExp, periodicity, label, isActive, JSON.stringify(tags));
-			stmt.finalize();
+	async addExecution({ websiteRecordId, startTime, endTime, crawledCount }) {
+		const lastID = await new Promise((resolve, reject) => {
+			this.db.serialize(() => {
+				const stmt = this.db.prepare(`
+					INSERT INTO execution_records (websiteRecordId, startTime, endTime, crawledCount)
+					VALUES (?, ?, ?, ?)
+				`);
+				stmt.run(websiteRecordId, startTime, endTime, crawledCount, function (err) {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(this.lastID);
+					}
+				});
+				stmt.finalize();
+			});
 		});
+		return {
+			id: lastID,
+			websiteRecordId,
+			startTime,
+			endTime,
+			crawledCount,
+		};
 	}
 
-	addExecution(websiteId, status, startTime, endTime, numberOfSitesCrawled) {
+	addCrawledData({ executionId, url, crawlTime, title, outgoingLinks }) {
 		this.db.serialize(() => {
 			const stmt = this.db.prepare(`
-                INSERT INTO execution_records (websiteRecordId, status, startTime, endTime, crawledCount)
-                VALUES (?, ?, ?, ?, ?)
-            `);
-			stmt.run(websiteId, status, startTime, endTime, numberOfSitesCrawled);
-			stmt.finalize();
-		});
-	}
-
-	addCrawledData(executionId, url, crawlTime, title, outgoingLinks) {
-		this.db.serialize(() => {
-			const stmt = this.db.prepare(`
-                INSERT INTO crawled_data (executionId, url, crawlTime, title, outgongLinks)
+                INSERT INTO crawled_data (executionId, url, crawlTime, title, outgoingLinks)
                 VALUES (?, ?, ?, ?, ?)
             `);
 			stmt.run(executionId, url, crawlTime, title, JSON.stringify(outgoingLinks));

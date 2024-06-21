@@ -3,9 +3,9 @@ class AdditionController {
 		this.model = model;
 	}
 
-	addWebsiteRecord(websiteRecord, crawlerManager) {
-		this.model.addWebsiteRecord(websiteRecord);
-		crawlerManager.enqueue(websiteRecord);
+	async addWebsiteRecord(websiteRecord, crawlerManager) {
+		const webisteRecordWithId = await this.model.addWebsiteRecord(websiteRecord);
+		crawlerManager.scheduleCrawl(webisteRecordWithId);
 	}
 }
 

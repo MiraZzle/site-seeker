@@ -1,15 +1,16 @@
 const websiteRecord = {
-	id: null,
+	id: null, //! this is the primary key
 	url: null,
 	boundaryRegExp: null,
 	periodicity: null,
 	label: null,
 	isActive: null,
 	tags: [],
+	isBeingCrawled: null,
 };
 
 const execution = {
-	id: null,
+	id: null, //! this is the primary key
 	websiteRecordId: null,
 	status: null,
 	startTime: null,
@@ -18,7 +19,7 @@ const execution = {
 };
 
 const crawledData = {
-	id: null,
+	id: null, //! this is the primary key
 	executionId: null,
 	url: null,
 	crawlTime: null,
