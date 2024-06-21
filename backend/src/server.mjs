@@ -1,8 +1,12 @@
 import express from "express";
 import http from "http";
 import { WebSocketServer } from "ws";
+import Model from "./models/model.mjs";
+import sqlite3 from "sqlite3";
 
 // Express application
+const db = new sqlite3.Database("./src/db/crawler.db");
+const model = new Model(db);
 const app = express();
 const server = http.createServer(app);
 const wsServer = new WebSocketServer({ server });
@@ -17,7 +21,14 @@ app.get("/", (req, res) => {
 });
 
 // API endpoint for website records
-app.get("/api/websiteRecords/", (req, res) => {});
+app.get("/api/websiteRecords/", async (req, res) => {
+	const result = await model.getAllWebsiteRecords();
+	if (result) {
+		res.status(200).json(result);
+	} else {
+		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+	}
+});
 
 app.post("/api/websiteRecords/add", (req, res) => {});
 
