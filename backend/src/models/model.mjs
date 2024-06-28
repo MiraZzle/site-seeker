@@ -31,6 +31,7 @@ class Model {
                 CREATE TABLE IF NOT EXISTS execution_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     websiteRecordId INTEGER,
+					status TEXT,
                     startTime DATETIME,
                     endTime DATETIME,
                     crawledCount INTEGER,
