@@ -1,14 +1,29 @@
 import express from "express";
 import http from "http";
 import { WebSocketServer } from "ws";
-import Model from "./models/model.mjs";
 import sqlite3 from "sqlite3";
-import AdditionController from "./controllers/additionController.mjs";
-import DataFormatter from "./utils/dataFormatter.mjs";
-import CrawlerManager from "./crawlers/crawlerManager.mjs";
+import { fileURLToPath, pathToFileURL } from "url";
+import path from "path";
+
+// Define this file's __filename and __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Define all the necessary paths
+const dbPath = path.join(__dirname, "./db/crawler.db");
+const modelPath = pathToFileURL(path.join(__dirname, "./models/model.mjs")).href;
+const additionControllerPath = pathToFileURL(path.join(__dirname, "./controllers/additionController.mjs")).href;
+const dataFormatterPath = pathToFileURL(path.join(__dirname, "./utils/dataFormatter.mjs")).href;
+const crawlerManagerPath = pathToFileURL(path.join(__dirname, "./crawlers/crawlerManager.mjs")).href;
+
+// Dynamically import modules
+const { default: Model} = await import(modelPath);
+const { default: AdditionController} = await import(additionControllerPath);
+const { default: DataFormatter} = await import(dataFormatterPath);
+const { default: CrawlerManager} = await import(crawlerManagerPath);
 
 // Express application
-const db = new sqlite3.Database("./src/db/crawler.db");
+const db = new sqlite3.Database(dbPath);
 const model = new Model(db);
 const crawlerManager = new CrawlerManager(model);
 const app = express();
