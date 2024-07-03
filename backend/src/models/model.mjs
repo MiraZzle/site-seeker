@@ -140,12 +140,22 @@ class Model {
 		}
 	}
 
-	deleteWebsiteRecord(id) {
-		this.db.serialize(() => {
-			const stmt = this.db.prepare("DELETE FROM website_records WHERE id = ?");
-			stmt.run(id);
-			stmt.finalize();
-		});
+	async deleteWebsiteRecord(id) {
+		try {
+			await new Promise((resolve, reject) => {
+				this.db.run("DELETE FROM website_records WHERE id = ?", [id], (err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
+			});
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
 	}
 
 	async addExecution({ websiteRecordId, startTime, endTime, crawledCount }) {
