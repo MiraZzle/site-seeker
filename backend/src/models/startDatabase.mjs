@@ -1,5 +1,14 @@
 import sqlite3 from "sqlite3";
-const db = new sqlite3.Database("./src/db/crawler.db");
+import { fileURLToPath } from "url";
+import path from "path";
+
+// Define this file's __filename and __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Define the path to the database and access it
+const dbPath = path.join(__dirname, "../db/crawler.db");
+const db = new sqlite3.Database(dbPath);
 
 function createDatabase() {
 	db.serialize(() => {
