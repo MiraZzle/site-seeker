@@ -124,7 +124,7 @@ class Model {
 				this.db.run(
 					"UPDATE website_records SET isBeingCrawled = NOT isBeingCrawled WHERE id = ?",
 					[id],
-					function (err) {
+					(err) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -155,7 +155,7 @@ class Model {
 					INSERT INTO execution_records (websiteRecordId, startTime, endTime, crawledCount)
 					VALUES (?, ?, ?, ?)
 				`);
-				stmt.run(websiteRecordId, startTime, endTime, crawledCount, function (err) {
+				stmt.run(websiteRecordId, startTime, endTime, crawledCount, (err) => {
 					if (err) {
 						reject(err);
 					} else {
