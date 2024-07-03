@@ -124,7 +124,7 @@ class Model {
 				this.db.run(
 					"UPDATE website_records SET isBeingCrawled = NOT isBeingCrawled WHERE id = ?",
 					[id],
-					function (err) {
+					(err) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -140,12 +140,48 @@ class Model {
 		}
 	}
 
-	deleteWebsiteRecord(id) {
-		this.db.serialize(() => {
-			const stmt = this.db.prepare("DELETE FROM website_records WHERE id = ?");
-			stmt.run(id);
-			stmt.finalize();
-		});
+	async deleteWebsiteRecord(id) {
+		try {
+			await new Promise((resolve, reject) => {
+				this.db.run("DELETE FROM website_records WHERE id = ?", [id], (err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
+			});
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
+	}
+
+	async updateWebsiteRecord(id, { url, boundaryRegExp, periodicity, label, isActive, tags }) {
+		try {
+			await new Promise((resolve, reject) => {
+				this.db.run(
+					`
+					UPDATE website_records
+					SET url = ?, boundaryRegExp = ?, periodicity = ?, label = ?, isActive = ?, tags = ?
+					WHERE id = ?
+				`,
+					[url, boundaryRegExp, periodicity, label, isActive, JSON.stringify(tags), id],
+					(err) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve();
+						}
+					}
+				);
+			});
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
 	}
 
 	async addExecution({ websiteRecordId, startTime, endTime, crawledCount }) {
@@ -155,7 +191,7 @@ class Model {
 					INSERT INTO execution_records (websiteRecordId, startTime, endTime, crawledCount)
 					VALUES (?, ?, ?, ?)
 				`);
-				stmt.run(websiteRecordId, startTime, endTime, crawledCount, function (err) {
+				stmt.run(websiteRecordId, startTime, endTime, crawledCount, (err) => {
 					if (err) {
 						reject(err);
 					} else {
