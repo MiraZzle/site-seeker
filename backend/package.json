@@ -16,6 +16,8 @@
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.19.2",
     "sqlite3": "^5.1.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "ws": "^8.17.1"
   }
 }
