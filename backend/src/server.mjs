@@ -1,5 +1,8 @@
 import express from "express";
 import http from "http";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
 import { WebSocketServer } from "ws";
 import sqlite3 from "sqlite3";
 import { fileURLToPath, pathToFileURL } from "url";
@@ -38,13 +41,86 @@ const port = 3000;
 // Middleware to parse JSON data
 app.use(express.json());
 
-// Root API endpoint
+// Swagger API documentation setup
+const options = {
+	definition: {
+		openapi: "3.0.0",
+		info: {
+			title: "Crawler API",
+			version: "1.0.0",
+		},
+	},
+	apis: [__filename], // Path to your API docs
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     WebsiteRecord:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: The auto-generated ID of the website record
+ *         url:
+ *           type: string
+ *           description: The URL of the website
+ *         boundaryRegExp:
+ *           type: string
+ *           description: The regular expression defining the boundary
+ *         periodicity:
+ *           type: integer
+ *           description: The periodicity of the crawl
+ *         label:
+ *           type: string
+ *           description: The label for the website record
+ *         isActive:
+ *           type: boolean
+ *           description: Whether the record is active
+ *         tags:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: List of tags associated with the record
+ *         isBeingCrawled:
+ *           type: boolean
+ *           description: Whether the website is currently being crawled
+ */
+
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     description: This is the root path!
+ *     responses:
+ *       200:
+ *         description: Returns a message.
+ */
 app.get("/", (req, res) => {
 	const rootMessage = { message: "This is the root path!" };
 	res.json(rootMessage);
 });
 
-// API endpoint for website records
+/**
+ * @swagger
+ * /api/websiteRecords/:
+ *   get:
+ *     description: Get all website records.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all records.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/WebsiteRecord'
+ *       500:
+ *         description: Internal server error.
+ */
 app.get("/api/websiteRecords/", async (req, res) => {
 	const result = await model.getAllWebsiteRecords();
 	if (result) {
@@ -54,6 +130,21 @@ app.get("/api/websiteRecords/", async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /api/websiteRecords/add:
+ *   post:
+ *     description: Add a new website record.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/WebsiteRecord'
+ *     responses:
+ *       200:
+ *         description: Successfully added the website record.
+ */
 app.post("/api/websiteRecords/add", (req, res) => {
 	const additionController = new AdditionController(model);
 	const websiteRecordTemp = req.body;
@@ -62,25 +153,62 @@ app.post("/api/websiteRecords/add", (req, res) => {
 	res.status(200).json({ message: "Website record added" });
 });
 
+/**
+ * @swagger
+ * /api/websiteRecords/delete/{id}:
+ *   delete:
+ *     description: Delete a website record by ID.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully deleted the website record.
+ */
 app.delete("/api/websiteRecords/delete/:id", (req, res) => {
 	const deletionController = new DeletionController(model);
 	const requestedId = req.params.id;
 	deletionController.deleteWebsiteRecord(requestedId);
-	res.status(200).json({ message: `Deleted website record with id ${requestedId}` });
+	res.status(200).json({
+		message: `Deleted website record with id ${requestedId}`,
+	});
 });
 
+/**
+ * @swagger
+ * /api/websiteRecords/update/{id}:
+ *   put:
+ *     description: Update a website record by ID.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/WebsiteRecord'
+ *     responses:
+ *       200:
+ *         description: Successfully updated the website record.
+ */
 app.put("/api/websiteRecords/update/:id", (req, res) => {
 	const updateController = new UpdateController(model);
 	const requestedId = req.params.id;
-	const updatedRecord = req.body.updatedWebsiteRecord;
+	const updatedRecord = req.body;
 	updateController.updateWebsiteRecord(requestedId, updatedRecord);
-	res.status(200).json({ message: `Updated website record with id ${requestedId}` });
+	res.status(200).json({
+		message: `Updated website record with id ${requestedId}`,
+	});
 });
 
-// GraphQL endpoint
-// app.use("/graphql", createHandler({ schema, rootValue: root }));
-
-// app.get("/graphiql", (req, res) => {});
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(port, () => {
 	console.log("Server is listening on port " + port);
