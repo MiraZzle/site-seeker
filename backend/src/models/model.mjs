@@ -158,6 +158,32 @@ class Model {
 		}
 	}
 
+	async updateWebsiteRecord(id, { url, boundaryRegExp, periodicity, label, isActive, tags }) {
+		try {
+			await new Promise((resolve, reject) => {
+				this.db.run(
+					`
+					UPDATE website_records
+					SET url = ?, boundaryRegExp = ?, periodicity = ?, label = ?, isActive = ?, tags = ?
+					WHERE id = ?
+				`,
+					[url, boundaryRegExp, periodicity, label, isActive, JSON.stringify(tags), id],
+					(err) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve();
+						}
+					}
+				);
+			});
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
+	}
+
 	async addExecution({ websiteRecordId, startTime, endTime, crawledCount }) {
 		const lastID = await new Promise((resolve, reject) => {
 			this.db.serialize(() => {

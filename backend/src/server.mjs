@@ -14,6 +14,7 @@ const dbPath = path.join(__dirname, "./db/crawler.db");
 const modelPath = pathToFileURL(path.join(__dirname, "./models/model.mjs")).href;
 const additionControllerPath = pathToFileURL(path.join(__dirname, "./controllers/additionController.mjs")).href;
 const deletionControllerPath = pathToFileURL(path.join(__dirname, "./controllers/deletionController.mjs")).href;
+const updateControllerPath = pathToFileURL(path.join(__dirname, "./controllers/updateController.mjs")).href;
 const dataFormatterPath = pathToFileURL(path.join(__dirname, "./utils/dataFormatter.mjs")).href;
 const crawlerManagerPath = pathToFileURL(path.join(__dirname, "./crawlers/crawlerManager.mjs")).href;
 
@@ -21,6 +22,7 @@ const crawlerManagerPath = pathToFileURL(path.join(__dirname, "./crawlers/crawle
 const { default: Model } = await import(modelPath);
 const { default: AdditionController } = await import(additionControllerPath);
 const { default: DeletionController } = await import(deletionControllerPath);
+const { default: UpdateController } = await import(updateControllerPath);
 const { default: DataFormatter } = await import(dataFormatterPath);
 const { default: CrawlerManager } = await import(crawlerManagerPath);
 
@@ -67,7 +69,13 @@ app.delete("/api/websiteRecords/delete/:id", (req, res) => {
 	res.status(200).json({ message: `Deleted website record with id ${requestedId}` });
 });
 
-app.put("/api/websiteRecords/update/:id", (req, res) => {});
+app.put("/api/websiteRecords/update/:id", (req, res) => {
+	const updateController = new UpdateController(model);
+	const requestedId = req.params.id;
+	const updatedRecord = req.body.updatedWebsiteRecord;
+	updateController.updateWebsiteRecord(requestedId, updatedRecord);
+	res.status(200).json({ message: `Updated website record with id ${requestedId}` });
+});
 
 // GraphQL endpoint
 // app.use("/graphql", createHandler({ schema, rootValue: root }));
