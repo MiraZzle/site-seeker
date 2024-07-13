@@ -1,3 +1,5 @@
+import { normalizeUrl } from '../utils/normalizeUrl.mjs'
+
 class Model {
 	static parseRows(rows) {
 		return rows.map((row) => ({
@@ -6,7 +8,7 @@ class Model {
 			boundaryRegExp: row.boundaryRegExp,
 			periodicity: row.periodicity,
 			label: row.label,
-			active: row.active,
+			isActive: row.isActive,
 			tags: JSON.parse(row.tags),
 			isBeingCrawled: row.isBeingCrawled,
 		}));
@@ -184,14 +186,14 @@ class Model {
 		}
 	}
 
-	async addExecution({ websiteRecordId, startTime, endTime, crawledCount }) {
+	async addExecution({ websiteRecordId, startTime, endTime, crawledCount, status }) {
 		const lastID = await new Promise((resolve, reject) => {
 			this.db.serialize(() => {
 				const stmt = this.db.prepare(`
-					INSERT INTO execution_records (websiteRecordId, startTime, endTime, crawledCount)
-					VALUES (?, ?, ?, ?)
+					INSERT INTO execution_records (websiteRecordId, startTime, endTime, crawledCount, status)
+					VALUES (?, ?, ?, ?, ?)
 				`);
-				stmt.run(websiteRecordId, startTime, endTime, crawledCount, (err) => {
+				stmt.run(websiteRecordId, startTime, endTime, crawledCount, status, function (err) {
 					if (err) {
 						reject(err);
 					} else {
@@ -207,7 +209,38 @@ class Model {
 			startTime,
 			endTime,
 			crawledCount,
+			status
 		};
+	}
+	async updateExecution({ id, endTime, crawledCount, status }) {
+		try {
+			await new Promise((resolve, reject) => {
+				this.db.serialize(() => {
+					const stmt = this.db.prepare(`
+				UPDATE execution_records
+				SET endTime = ?, crawledCount = ?, status = ?
+				WHERE id = ?
+			  `);
+					stmt.run(endTime, crawledCount, status, id, function (err) {
+						if (err) {
+							reject(err);
+						} else {
+							resolve();
+						}
+					});
+					stmt.finalize();
+				});
+			});
+			return {
+				id,
+				endTime,
+				crawledCount,
+				status
+			};
+		} catch (err) {
+			console.error(err);
+			return null;
+		}
 	}
 
 	addCrawledData({ executionId, url, crawlTime, title, outgoingLinks }) {
@@ -219,6 +252,118 @@ class Model {
 			stmt.run(executionId, url, crawlTime, title, JSON.stringify(outgoingLinks));
 			stmt.finalize();
 		});
+	}
+
+	async getNodesByWebPageIds(webPageIds) {
+		try {
+			const nodes = await new Promise((resolve, reject) => {
+				const placeholders = webPageIds.map(() => '?').join(',');
+				const query = `
+			  SELECT cd.*, wr.id as ownerId, wr.label as ownerLabel, wr.url as ownerUrl, wr.boundaryRegExp as ownerRegExp,
+					 wr.tags as ownerTags, wr.isActive as ownerActive
+			  FROM crawled_data cd
+			  INNER JOIN execution_records er ON cd.executionId = er.id
+			  INNER JOIN website_records wr ON er.websiteRecordId = wr.id
+			  WHERE wr.id IN (${placeholders})
+			`;
+				this.db.all(query, webPageIds, (err, rows) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
+				});
+			});
+
+			const uniqueLinks = new Set();
+			const nodesWithLinks = await Promise.all(nodes.map(async node => {
+				const outgoingLinks = JSON.parse(node.outgoingLinks).map(link => normalizeUrl(link.url));
+				outgoingLinks.forEach(link => uniqueLinks.add(link));
+
+				if (uniqueLinks.size === 0) {
+					return {
+						title: node.title,
+						url: node.url,
+						crawlTime: node.crawlTime,
+						links: [],
+						owner: {
+							identifier: node.ownerId,
+							label: node.ownerLabel,
+							url: node.ownerUrl,
+							regexp: node.ownerRegExp,
+							tags: JSON.parse(node.ownerTags),
+							active: node.ownerActive
+						}
+					};
+				}
+
+				const uniqueLinksArray = Array.from(uniqueLinks);
+				const placeholders = uniqueLinksArray.map(() => '?').join(',');
+				const links = await new Promise((resolve, reject) => {
+					const query = `
+				SELECT cd.*
+				FROM crawled_data cd
+				INNER JOIN (
+				  SELECT url, MAX(crawlTime) AS maxCrawlTime
+				  FROM crawled_data
+				  WHERE url IN (${placeholders})
+				  GROUP BY url
+				) grouped_cd
+				ON cd.url = grouped_cd.url AND cd.crawlTime = grouped_cd.maxCrawlTime
+			  `;
+					this.db.all(query, uniqueLinksArray, (err, linkRows) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(linkRows);
+						}
+					});
+				});
+
+				return {
+					title: node.title,
+					url: node.url,
+					crawlTime: node.crawlTime,
+					links: links.map(link => ({
+						title: link.title,
+						url: link.url,
+						crawlTime: link.crawlTime,
+						links: [],
+						owner: {
+							identifier: node.ownerId,
+							label: node.ownerLabel,
+							url: node.ownerUrl,
+							regexp: node.ownerRegExp,
+							tags: JSON.parse(node.ownerTags),
+							active: node.ownerActive
+						}
+					})),
+					owner: {
+						identifier: node.ownerId,
+						label: node.ownerLabel,
+						url: node.ownerUrl,
+						regexp: node.ownerRegExp,
+						tags: JSON.parse(node.ownerTags),
+						active: node.ownerActive
+					}
+				};
+			}));
+
+			// Remove duplicate nodes by URL
+			const uniqueNodes = [];
+			const seenUrls = new Set();
+			for (const node of nodesWithLinks) {
+				if (!seenUrls.has(node.url)) {
+					uniqueNodes.push(node);
+					seenUrls.add(node.url);
+				}
+			}
+
+			return uniqueNodes;
+		} catch (err) {
+			console.error(err);
+			return [];
+		}
 	}
 }
 
