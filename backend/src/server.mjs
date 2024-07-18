@@ -236,10 +236,9 @@ const NodeType = new GraphQLObjectType({
 	})
 });
 
-
 const schema = new GraphQLSchema({
 	query: new GraphQLObjectType({
-		name: 'RootQueryType',
+		name: 'Query',
 		fields: {
 			websites: {
 				type: new GraphQLList(WebPageType),
