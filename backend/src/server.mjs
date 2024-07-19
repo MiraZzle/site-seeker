@@ -8,6 +8,10 @@ import sqlite3 from "sqlite3";
 import { fileURLToPath, pathToFileURL } from "url";
 import path from "path";
 
+import { createHandler } from "graphql-http/lib/use/express";
+import { graphql, GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList, GraphQLBoolean } from 'graphql';
+import { ruruHTML } from "ruru/server";
+
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -206,6 +210,74 @@ app.put("/api/websiteRecords/update/:id", (req, res) => {
 	res.status(200).json({
 		message: `Updated website record with id ${requestedId}`,
 	});
+});
+
+// GraphQL schema
+const WebPageType = new GraphQLObjectType({
+	name: "WebPage",
+	fields: {
+		identifier: { type: GraphQLID },
+		label: { type: GraphQLString },
+		url: { type: GraphQLString },
+		regexp: { type: GraphQLString },
+		tags: { type: new GraphQLList(GraphQLString) },
+		active: { type: GraphQLBoolean },
+	}
+});
+
+const NodeType = new GraphQLObjectType({
+	name: "Node",
+	fields: () => ({
+		title: { type: GraphQLString },
+		url: { type: GraphQLString },
+		crawlTime: { type: GraphQLString },
+		links: { type: new GraphQLList(NodeType) },
+		owner: { type: WebPageType }
+	})
+});
+
+const schema = new GraphQLSchema({
+	query: new GraphQLObjectType({
+		name: 'Query',
+		fields: {
+			websites: {
+				type: new GraphQLList(WebPageType),
+				resolve: async () => {
+					const records = await model.getAllWebsiteRecords();
+					return records.map(record => ({
+						identifier: record.id,
+						label: record.label,
+						url: record.url,
+						regexp: record.boundaryRegExp,
+						tags: record.tags,
+						active: record.isActive
+					}));
+				}
+			},
+			nodes: {
+				type: new GraphQLList(NodeType),
+				args: {
+					webPages: { type: new GraphQLList(GraphQLID) }
+				},
+				resolve: async (_, { webPages }) => {
+					const nodes = await model.getNodesByWebPageIds(webPages);
+					return nodes;
+				}
+			}
+		},
+	}),
+});
+
+app.all(
+	"/graphql",
+	createHandler({
+		schema: schema,
+	})
+);
+
+app.get("/graphiql", (_req, res) => {
+	res.type("html");
+	res.end(ruruHTML({ endpoint: "/graphql" }));
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

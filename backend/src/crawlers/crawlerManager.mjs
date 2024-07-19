@@ -8,7 +8,7 @@ class CrawlerManager {
 	scheduleCrawl(websiteRecord) {
 		this.crawlWebsiteRecord(websiteRecord);
 	}
-	
+
 	async crawlWebsiteRecord(websiteRecord) {
 		this.model.toggleIsBeingCrawled(websiteRecord.id);
 		//TODO: Remove the status column from execution
@@ -17,6 +17,7 @@ class CrawlerManager {
 			startTime: new Date(),
 			endTime: null,
 			crawledCount: 0,
+			status: "crawling"
 		};
 		execution = await this.model.addExecution(execution);
 		const worker = new Worker("./src/crawlers/crawler.mjs", {
@@ -29,8 +30,8 @@ class CrawlerManager {
 			} else if (message.status === "completed") {
 				this.model.toggleIsBeingCrawled(websiteRecord.id);
 				execution.endTime = new Date();
-				//TODO: add update execution method to model class
-				// this.model.addExecutionRecord(executionWithId);
+				execution.status = "completed"
+				this.model.updateExecution(execution);
 				if (websiteRecord.isActive) {
 					setTimeout(() => {
 						this.crawlWebsiteRecord(websiteRecord);

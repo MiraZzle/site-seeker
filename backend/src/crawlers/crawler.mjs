@@ -2,6 +2,7 @@ import { workerData, parentPort } from "worker_threads";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import url from "url";
+import { normalizeUrl } from "../utils/normalizeUrl.mjs";
 
 async function crawlPage(websiteRecord, executionId, pageUrl) {
 	try {
@@ -15,12 +16,12 @@ async function crawlPage(websiteRecord, executionId, pageUrl) {
 
 		$(links).each((index, element) => {
 			const href = $(element).attr("href");
-			if (href && href.startsWith("http")) {
-				const absoluteUrl = url.resolve(pageUrl, href);
+			if (href) {
+				const absoluteUrl = normalizeUrl(url.resolve(pageUrl, href));
 				if (!outgoingLinksSet.has(absoluteUrl)) {
 					const linkObject = {
 						url: absoluteUrl,
-						skipped: !new RegExp(websiteRecord.RegExp).test(absoluteUrl),
+						skipped: !new RegExp(websiteRecord.boundaryRegExp).test(absoluteUrl),
 					};
 					outgoingLinks.push(linkObject);
 					outgoingLinksSet.add(absoluteUrl);
@@ -47,7 +48,7 @@ async function crawlPage(websiteRecord, executionId, pageUrl) {
 (async () => {
 	const { websiteRecord, execution } = workerData;
 	const visited = new Set();
-	const toVisit = [websiteRecord.url];
+	const toVisit = [normalizeUrl(websiteRecord.url)];
 
 	while (toVisit.length > 0) {
 		const currentUrl = toVisit.shift();
