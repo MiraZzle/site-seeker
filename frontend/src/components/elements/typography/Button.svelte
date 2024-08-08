@@ -1,5 +1,6 @@
 <script lang="ts">
-    export let type: 'primary' | 'secondary' | 'dark' = 'primary';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+    export let type: 'primary' | 'secondary' | 'dark' | 'danger' = 'primary';
     let btnType = `btn_${type}`;
 </script>
 
@@ -8,6 +9,8 @@
 </button>
 
 <style lang="scss">
+    @import '../../../styles/variables.scss';
+
     .btn {
         display: flex;
         border-radius: 8px;
@@ -16,16 +19,21 @@
         gap: 8px;
 
         &_primary {
-            background-color: #007bff;
-            color: #fff;
+            background-color: $c-blue;
+            color: $c-white;
         }
         &_secondary {
-            background-color: #6c757d;
-            color: #fff;
+            background: none;
+            border: 1px solid $c-gray-dark;
+            color: $c-gray-dark;
         }
         &_dark {
-            background-color: #343a40;
-            color: #fff;
+            background-color: $c-gray-dark;
+            color: $c-white;
+        }
+        &_danger {
+            background-color: $c-red;
+            color: $c-white;
         }
     }
 </style>
