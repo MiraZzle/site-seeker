@@ -19,6 +19,8 @@ const config = {
 			$assets: './src/assets',
 			$lib: './src/lib',
 			$layouts: './src/layouts',
+			$scripts: './src/scripts',
+			$types: './src/lib/types',
 		}
 	}
 };
