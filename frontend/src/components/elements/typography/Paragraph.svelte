@@ -23,6 +23,7 @@
         font-size: 16px;
         font-weight: 400;
         line-height: 120%;
+        margin: 0;
 
         &--1 {
             font-size: 32px;

@@ -21,6 +21,7 @@
     @import '../../../styles/variables.scss';
 
     .header {
+        margin: 0;
         &--1 {
             font-size: 72px;
             font-weight: 700;
