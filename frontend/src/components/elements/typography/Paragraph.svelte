@@ -26,7 +26,7 @@
         margin: 0;
 
         &--1 {
-            font-size: 32px;
+            font-size: 28px;
         }
 
         &--2 {

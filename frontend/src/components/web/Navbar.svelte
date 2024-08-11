@@ -4,17 +4,18 @@
 </script>
 
 <nav class="navbar">
-    <Logo />
-
     <div class="nav-container">
-    <div class="page-nav">
-        <a class="nav-link" href="/">Home</a>
-        <a class="nav-link" href="/records">Records</a>
-        <a class="nav-link" href="/executor">Executor</a>
-        <a class="nav-link" href="/visualization">Visualization</a>
-        <a class="nav-link" href="/api">API</a>
-    </div>
-    <GithubButton/>
+        <Logo />
+        <div class="nav-container-links">
+            <div class="page-nav">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/records">Records</a>
+                <a class="nav-link" href="/executor">Executor</a>
+                <a class="nav-link" href="/visualization">Visualization</a>
+                <a class="nav-link" href="/api">API</a>
+            </div>
+            <GithubButton/>
+        </div>
     </div>
 </nav>
 
@@ -23,17 +24,23 @@
 
     .navbar {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 32px;
-        border-bottom: 1px solid #d9d9d9;
+        justify-content: center;
+        padding: 24px;
+        border-bottom: 1px solid $c-gray-outline;
     }
 
     .nav-container {
+        max-width: 1200px;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+
+        &-links{
         display: flex;
         gap: 24px;
         align-items: right;
         justify-content: center;
+        }
     }
 
     .page-nav {

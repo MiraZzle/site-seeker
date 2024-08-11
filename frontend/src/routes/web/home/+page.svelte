@@ -43,8 +43,8 @@
             <svelte:fragment slot="header"> Site Management </svelte:fragment>
             <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
         </FeatureCard>
-    </div>
-    <div class="features-cards">
+    
+    
         <FeatureCard>
             <svelte:fragment slot="header"> Site Management </svelte:fragment>
             <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
@@ -90,6 +90,7 @@
         align-items: center;
         padding: 64px;
         gap: 32px;
+        
 
         .features-description {
             display: flex;
@@ -103,7 +104,10 @@
 
         .features-cards {
             display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 64px;
+            max-width: 1200px;
         }
     }
 </style>

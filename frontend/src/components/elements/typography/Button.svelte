@@ -4,13 +4,21 @@
     export let width: 'full' | 'auto' | '150' = 'auto';
 
     export let actionType: 'link' | 'action' = 'action';
-    export let action: () => undefined = () => {};
+    export let action = () => {};
     export let href: string = '';
     let btnType = `btn_${type}`;
     let btnWidth = `btn-width_${width}`;
+
+    function handleClick() {
+        if (actionType === 'link') {
+            window.location.href = href;
+        } else {
+            action();
+        }
+    }
 </script>
 
-<button class="btn {btnType} {btnWidth}" on:click={action()}>
+<button class="btn {btnType} {btnWidth}" on:click={handleClick}>
     <slot></slot>
 </button>
 

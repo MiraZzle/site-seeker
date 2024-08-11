@@ -35,7 +35,7 @@
             font-weight: 400;
             line-height: 140%;
             padding: 8px;
-            width: 80px;
+            width: 48px;
         }
     }
 </style>
