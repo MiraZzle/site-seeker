@@ -8,11 +8,11 @@
 
     <div class="nav-container">
     <div class="page-nav">
-        <a class="nav-link" href="#/">Home</a>
-        <a class="nav-link" href="#/features">Records</a>
-        <a class="nav-link" href="#/about">Executor</a>
-        <a class="nav-link" href="#/about">Visualization</a>
-        <a class="nav-link" href="#/about">API</a>
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/records">Records</a>
+        <a class="nav-link" href="/executor">Executor</a>
+        <a class="nav-link" href="/visualization">Visualization</a>
+        <a class="nav-link" href="/api">API</a>
     </div>
     <GithubButton/>
     </div>
