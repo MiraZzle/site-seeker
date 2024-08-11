@@ -1,10 +1,12 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-unused-vars */
     export let type: 'primary' | 'secondary' | 'dark' | 'danger' = 'primary';
+    export let width: 'full' | 'auto' | '150' = 'auto';
     let btnType = `btn_${type}`;
+    let btnWidth = `btn-width_${width}`;
 </script>
 
-<button class="btn {btnType}">
+<button class="btn {btnType} {btnWidth}">
     <slot></slot>
 </button>
 
@@ -17,6 +19,21 @@
         padding: 12px;
         border: none;
         gap: 8px;
+        justify-content: center;
+        align-items: center;
+
+        &.btn-width_full {
+            width: 100%;
+        }
+
+        &.btn-width_auto {
+            width: auto;
+        }
+
+        &.btn-width_150 {
+            width: 150px;
+            padding: 0;
+        }
 
         &_primary {
             background-color: $c-blue;
