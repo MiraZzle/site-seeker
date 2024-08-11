@@ -23,3 +23,9 @@ a {
     text-decoration: none;
     color: inherit;
 }
+
+.highlight {
+    &--blue {
+        color:#226CE0;
+    }
+}

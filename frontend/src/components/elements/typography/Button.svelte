@@ -2,11 +2,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
     export let type: 'primary' | 'secondary' | 'dark' | 'danger' = 'primary';
     export let width: 'full' | 'auto' | '150' = 'auto';
+
+    export let actionType: 'link' | 'action' = 'action';
+    export let action: () => undefined = () => {};
+    export let href: string = '';
     let btnType = `btn_${type}`;
     let btnWidth = `btn-width_${width}`;
 </script>
 
-<button class="btn {btnType} {btnWidth}">
+<button class="btn {btnType} {btnWidth}" on:click={action()}>
     <slot></slot>
 </button>
 
