@@ -33,7 +33,6 @@
             display: flex;
             align-items:flex-start;
             height: 100%;
-
         }
 
         &__content {
