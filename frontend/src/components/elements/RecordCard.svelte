@@ -4,7 +4,7 @@
 
     export let status = "Finished";
     export let time = "29/07/24 16:24";
-    export let tags = ["1", "2", "3", "4sss"];
+    export let tags = ["Test", "Automation", "Web"];
     export let label = "Test";
     export let periodicity = "Every Hour";
 </script>
@@ -29,11 +29,7 @@
         </div>
         <div class="record-card-info-item">
             <span class="record-card-info-label">Tags</span>
-            <select>
-            {#each tags as tag}
-            <option value={tag}>{tag}</option>
-            {/each}
-            </select>
+            <span class="record-card-info-value record-card-info-value--tags"> {tags.join(", ")} </span>
         </div>
     </div>
     <div class="record-card-actions">
@@ -57,8 +53,8 @@
         border: 1px solid $c-gray-outline;
         border-radius: 8px;
         padding: 16px;
-        width: 100%;
-        max-width: 830px;
+        width: auto;
+        //max-width: 830px;
 
         &-info {
             display: flex;
@@ -78,14 +74,18 @@
                 color: $c-gray-light;
             }
 
-                &-value {
-                    font-size: 16px;
-                    line-height: 140%;
-                    font-weight: 600;
+            &-value {
+                font-size: 16px;
+                line-height: 140%;
+                font-weight: 600;
+
+                &--tags {
+                    font-weight: 400;
+                    max-width: 200px;
                 }
             }
         }
-
+    }
 
     .record-card-actions {
         display: flex;
