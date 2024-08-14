@@ -35,10 +35,12 @@
         'Crawled descending'
     ];
 
-    let selectedOption = writable(sortingOptions[0]);
+    let selectedSortingOption = writable(sortingOptions[0]);
 
-    function handleSelect(option: string) {
-        selectedOption.set(option);
+    function handleSortSelect(option: string) {
+        console.log('Selected option', option);
+        selectedSortingOption.set(option);
+        // Sort records based on selected option
     }
 
     let displayedRecords : any[] = [];
@@ -53,10 +55,14 @@
         return displayedRecords;
     }
 
-
     onMount(() => {
         loadRecords(currentPage);
     });
+
+    function handleFilter() {
+        console.log('Filtering records');
+    }
+
 </script>
 
 <Navbar />
@@ -79,7 +85,7 @@
     </Card>
     <div class="records-view__pagination-container">
         <div class="records-view__pagination-container__sorting">
-            <SortOptions options={sortingOptions} bind:selectedOption={$selectedOption} onSelect={handleSelect} />
+            <SortOptions options={sortingOptions} bind:selectedOption={$selectedSortingOption} onSelect={handleSortSelect} />
         </div>
         <div class="records-view__pagination-container__records">
             {#each displayedRecords as record}
