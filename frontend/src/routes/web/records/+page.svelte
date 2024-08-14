@@ -10,16 +10,44 @@
     import PaginationBar from "$components/elements/PaginationBar.svelte";
     import TagButton from "$components/utils/TagButton.svelte";
     import Tag from "$components/utils/Tag.svelte";
+    import AddRecordModal from "$components/utils/AddRecordModal.svelte";
+    import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
+    import EditRecordModal from "$components/utils/EditRecordModal.svelte";
+    import DeleteRecordModal from "$components/utils/DeleteRecordModal.svelte";
+    import AddTagModal from "$components/utils/AddTagModal.svelte"
 
     import { writable } from 'svelte/store';
     import { onMount } from 'svelte';
 
+    let recordId = 1;
     let currentPage: number = 1;
     const dummyRecords : any[] = [
         1,2,3,4,5,6,7,8,9
     ]
 
+    let createModalVisible = false;
+    let tagModalVisible = false;
+    let executionModalVisible = false;
+    let editModalVisible = false;
+    let deleteModalVisible = false;
+
     let tags : any[] = ["Test", "Automation", "Web"];
+
+    function showTagModal(){
+        tagModalVisible = true;
+    }
+
+    function showEditModal(){
+        editModalVisible = true;
+    }
+
+    function showExecutionModal(){
+        executionModalVisible = true;
+    }
+
+    function addTag(tagName: string) {
+        tags = [...tags, tagName];
+    }
 
     function removeTag(tagName: string) {
         console.log('Removing tag', tagName);
@@ -40,7 +68,6 @@
     function handleSortSelect(option: string) {
         console.log('Selected option', option);
         selectedSortingOption.set(option);
-        // Sort records based on selected option
     }
 
     let displayedRecords : any[] = [];
@@ -65,10 +92,16 @@
 
 </script>
 
+<AddTagModal bind:showModal={tagModalVisible} action={addTag}/>
+<AddRecordModal bind:showModal={createModalVisible}/>
+<ExecutionStartedModal bind:showModal={executionModalVisible}/>
+<EditRecordModal bind:showModal={editModalVisible}/>
+<DeleteRecordModal bind:showModal={deleteModalVisible} id={recordId}/>
+
 <Navbar />
 <div class="records-cta">
     <Header type={3}> Your Web Records </Header>
-    <Button type="primary"> Create Website Record </Button>
+    <Button type="primary" actionType="action" action={() => {createModalVisible = true}}> Create Website Record </Button>
 </div>
 <div class="records-view">
     <Card>
@@ -76,7 +109,7 @@
         <TextInput description="Label" id="label"/>
         Tags
         <div class="records-view__tags">
-            <TagButton/>
+            <TagButton action={() => {tagModalVisible = true}}/>
             {#each tags as tag}
                 <Tag name={tag} removeTagAction={removeTag}/>
             {/each}
@@ -89,7 +122,7 @@
         </div>
         <div class="records-view__pagination-container__records">
             {#each displayedRecords as record}
-                <RecordCard label={record}/>
+                <RecordCard label={record} startAction={showExecutionModal} editAction={showEditModal}/>
             {/each}
         </div>
         <div class="records-view__pagination-container__bar">

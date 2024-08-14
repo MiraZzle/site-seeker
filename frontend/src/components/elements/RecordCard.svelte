@@ -7,6 +7,9 @@
     export let tags = ["Test", "Automation", "Web"];
     export let label = "Test";
     export let periodicity = "Every Hour";
+
+    export let editAction : () => void = () => {};
+    export let startAction : () => void = () => {};
 </script>
 
 <div class="record-card shadow">
@@ -35,11 +38,11 @@
     <div class="record-card-actions">
         <div class="record-card-action">
             <span class="record-card-info-label">Edit</span>
-            <Edit />
+            <button class="record-card__button" on:click={() => editAction()}> <Edit/> </button>
         </div>
         <div class="record-card-action">
             <span class="record-card-info-label">Start</span>
-            <Start />
+            <button class="record-card__button" on:click={() => startAction()}> <Start/> </button>
         </div>
     </div>
 </div>
@@ -55,6 +58,14 @@
         padding: 16px;
         width: auto;
         //max-width: 830px;
+
+        &__button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
 
         &-info {
             display: flex;

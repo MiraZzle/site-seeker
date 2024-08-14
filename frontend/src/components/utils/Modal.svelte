@@ -2,7 +2,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { createEventDispatcher } from 'svelte';
 
-    export let width: 'auto' | '600px' = 'auto'; // Supports 'auto' and '600px'
+    export let width: 'auto' | '600px' | '480px' = 'auto'; // Supports 'auto' and '600px'
     export let closeOnEscape: boolean = true;
     export let closeOnOutsideClick: boolean = true;
     export let closeOnCross: boolean = false;
@@ -90,7 +90,7 @@
         margin: auto;
         flex-direction: column;
         padding: 24px;
-        gap: 24px;
+        gap: 14px;
         color: $c-white;
         border: 1px solid $c-gray-outline;
         background-color: $c-white;
@@ -102,6 +102,10 @@
 
         &--width-600px {
             width: 600px;
+        }
+
+        &--width-480px {
+            width: 480px;
         }
     }
 </style>

@@ -19,7 +19,7 @@
 
     .feature-card {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         padding: 24px;
         gap: 24px;
         border-radius: 8px;
@@ -28,6 +28,10 @@
         border-width: 1px;
         border-style: solid;
         border-color: #D9D9D9;
+        transition: all .1s ease-out;
+        &:hover {
+            transform: scale(1.07);
+        }
 
         &__icon {
             display: flex;

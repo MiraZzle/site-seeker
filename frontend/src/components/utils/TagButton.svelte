@@ -1,10 +1,7 @@
 <script lang="ts">
     import Button from "$components/elements/typography/Button.svelte";
     import Plus from "./icons/Plus.svelte";
-
-    function addTag() {
-        console.log("Tag added");
-    }
+    export let action: () => void = () => {};
 </script>
 
-<Button type="dark" action={addTag}> Add Tag <Plus/> </Button>
+<Button type="dark" actionType="action" action={action}> Add Tag <Plus/> </Button>

@@ -36,26 +36,25 @@
             <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
         </FeatureCard>
         <FeatureCard>
-            <svelte:fragment slot="header"> Site Management </svelte:fragment>
-            <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
+            <svelte:fragment slot="header"> Editable Crawling </svelte:fragment>
+            <svelte:fragment slot="description"> Set crawling boundaries with RegExp and define crawl frequency to capture relevant data tailored to your needs. </svelte:fragment>
         </FeatureCard>
                 <FeatureCard>
-            <svelte:fragment slot="header"> Site Management </svelte:fragment>
-            <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
-        </FeatureCard>
-    
-    
-        <FeatureCard>
-            <svelte:fragment slot="header"> Site Management </svelte:fragment>
-            <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
+            <svelte:fragment slot="header"> Execution Tracker </svelte:fragment>
+            <svelte:fragment slot="description"> Monitor and manage all crawling executions with detailed logs and statuses to ensure smooth data collection. </svelte:fragment>
         </FeatureCard>
         <FeatureCard>
-            <svelte:fragment slot="header"> Site Management </svelte:fragment>
-            <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
+            <svelte:fragment slot="header"> Data Visualization </svelte:fragment>
+            <svelte:fragment slot="description"> Visualize crawled data with interactive graphs. Switch between website and domain views for better insights. </svelte:fragment>
+        </FeatureCard>
+        <FeatureCard>
+            <svelte:fragment slot="header"> GraphQL API </svelte:fragment>
+            <svelte:fragment slot="description"> Access your crawled data seamlessly through a powerful GraphQL API for custom integrations and solutions. </svelte:fragment>
         </FeatureCard>
                 <FeatureCard>
-            <svelte:fragment slot="header"> Site Management </svelte:fragment>
-            <svelte:fragment slot="description"> Easily manage your website records with full CRUD operations, keeping your web crawling tasks organized. </svelte:fragment>
+            <svelte:fragment slot="header"> Manual Execution </svelte:fragment>
+            <svelte:fragment slot="description"> Start crawls manually with one click, ensuring timely data updates whenever needed.
+            </svelte:fragment>
         </FeatureCard>
     </div>
 </div>
