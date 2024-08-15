@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     import { createEventDispatcher } from 'svelte';
+    import Cross from './icons/Cross.svelte';
 
     export let width: 'auto' | '600px' | '480px' = 'auto'; // Supports 'auto' and '600px'
     export let closeOnEscape: boolean = true;
@@ -61,6 +62,7 @@
         on:keydown={handleOverlayKeydown}
     >
         <div class="modal modal--width-{width}">
+            <button class="close-button" on:click={closeModal}> <Cross/> </button>
             <slot></slot>
         </div>
     </div>
@@ -69,6 +71,18 @@
 
 <style lang="scss">
     @import "../../styles/variables.scss";
+
+    .close-button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        align-self: flex-end;
+        position: relative;
+        top: 24px;
+        margin-top: -24px;
+    }
 
     .modal-overlay {
         position: fixed;

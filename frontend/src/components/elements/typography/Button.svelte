@@ -33,6 +33,7 @@
         gap: 8px;
         justify-content: center;
         align-items: center;
+        font-weight: 500;
 
         &.btn-width_full {
             width: 100%;
@@ -50,6 +51,10 @@
         &_primary {
             background-color: $c-blue;
             color: $c-white;
+
+            &:hover {
+                background-color: $c-black;
+            }
         }
         &_secondary {
             background: none;
@@ -59,6 +64,10 @@
         &_dark {
             background-color: $c-gray-dark;
             color: $c-white;
+
+            &:hover {
+                background-color: $c-blue;
+            }
         }
         &_danger {
             background-color: $c-red;

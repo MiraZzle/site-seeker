@@ -98,7 +98,7 @@
 <EditRecordModal bind:showModal={editModalVisible}/>
 <DeleteRecordModal bind:showModal={deleteModalVisible} id={recordId}/>
 
-<Navbar />
+<Navbar activePage="Records"/>
 <div class="records-cta">
     <Header type={3}> Your Web Records </Header>
     <Button type="primary" actionType="action" action={() => {createModalVisible = true}}> Create Website Record </Button>

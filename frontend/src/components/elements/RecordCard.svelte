@@ -58,6 +58,11 @@
         padding: 16px;
         width: auto;
         //max-width: 830px;
+        transition: all .1s ease-out;
+
+        &:hover {
+            transform: scale(1.04);
+        }
 
         &__button {
             background-color: transparent;
