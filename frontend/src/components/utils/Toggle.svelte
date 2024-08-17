@@ -32,7 +32,7 @@
         background-color: #2c2c2c;
         border-radius: 24px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: background-color 0.15s;
     }
 
     .toggle::before {
@@ -45,7 +45,7 @@
         top: 50%;
         left: 2px;
         transform: translateY(-50%);
-        transition: transform 0.3s;
+        transition: transform 0.15s;
     }
 
     .toggle--checked {
