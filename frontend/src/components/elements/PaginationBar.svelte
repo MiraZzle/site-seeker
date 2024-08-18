@@ -10,6 +10,10 @@
     let pageCount: number;
     let pages: Writable<any[]> = writable([]);
 
+    // 💀 SHITTY CODE AHEAD 💀
+    // tahle funkce je mega blitka
+    // pokud mas cas (ja ho nemam), prepis ji
+    // diky - Matej
     function createPages() {
         const totalRecords: number = records.length;
         const totalPages = Math.ceil(totalRecords / perPage);
@@ -18,21 +22,25 @@
         let pagesArray: any[] = [];
 
         if (currentPage === 1) {
-            if (totalPages > 1) {
-                pagesArray = [1, 2, 3];
+            if (totalPages === 1) {
+                pagesArray = [1];
             } else if (totalPages === 2) {
                 pagesArray = [1, 2];
             }
             else {
-                pagesArray = [1];
+                pagesArray = [1, 2, 3];
             }
         } else if (currentPage > 1 && currentPage < totalPages) {
             pagesArray = [currentPage - 1, currentPage, currentPage + 1];
         } else if (currentPage === totalPages) {
-            pagesArray = [totalPages - 2, totalPages - 1, totalPages];
+            console.log('Current page is last page');
+            if (totalPages === 2) {
+                pagesArray = [, totalPages - 1, totalPages];
+            } else {
+                pagesArray = [totalPages - 2, totalPages - 1, totalPages];
+            }
         }
 
-        // Add first and last page
         if (currentPage > 3) {
             pagesArray = [1, '...', ...pagesArray];
         }
@@ -44,7 +52,7 @@
         pages.set(pagesArray);
     }
 
-    $: createPages(); // Recreate pages array whenever relevant data changes
+    $: createPages(); // narenderujeme nove stranku, pokud se v ni pouzita promena zmeni
 
     function goToPage(page: number) {
         if (page > 0 && page <= pageCount) {

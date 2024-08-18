@@ -52,6 +52,8 @@
         display: flex;
         flex-direction: row;
         gap: 8px;
+        width: 100%;
+        justify-content: space-around;
 
         &-item {
             display: flex;
