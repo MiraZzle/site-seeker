@@ -222,6 +222,7 @@ const WebPageType = new GraphQLObjectType({
 		regexp: { type: GraphQLString },
 		tags: { type: new GraphQLList(GraphQLString) },
 		active: { type: GraphQLBoolean },
+		periodicity: {type: GraphQLString}
 	}
 });
 
@@ -250,7 +251,8 @@ const schema = new GraphQLSchema({
 						url: record.url,
 						regexp: record.boundaryRegExp,
 						tags: record.tags,
-						active: record.isActive
+						active: record.isActive,
+						periodicity: record.periodicity
 					}));
 				}
 			},
