@@ -1,15 +1,18 @@
 <script lang="ts">
     import Start from "$components/utils/icons/Start.svelte";
     import Edit from "$components/utils/icons/Edit.svelte";
+    import Show from "$components/utils/icons/Show.svelte";
 
     export let status = "Finished";
     export let time = "29/07/24 16:24";
     export let tags = ["Test", "Automation", "Web"];
     export let label = "Test";
     export let periodicity = "Every Hour";
+    export let id = 1;
 
     export let editAction : () => void = () => {};
     export let startAction : () => void = () => {};
+    export let showAction : (recordID : number) => void = (recordID = id) => {};
 </script>
 
 <div class="record-card shadow">
@@ -43,6 +46,10 @@
         <div class="record-card-action">
             <span class="record-card-info-label">Start</span>
             <button class="record-card__button" on:click={() => startAction()}> <Start/> </button>
+        </div>
+        <div class="record-card-action">
+            <span class="record-card-info-label">Show</span>
+            <button class="record-card__button" on:click={() => showAction(id)}> <Show/> </button>
         </div>
     </div>
 </div>
@@ -106,12 +113,14 @@
     .record-card-actions {
         display: flex;
         flex-direction: row;
-        gap: 8px;
+        gap: 4px;
     }
 
     .record-card-action {
         display: flex;
         flex-direction: column;
         gap: 2px;
+        width: 40px;
+        align-items: center;
     }
 </style>

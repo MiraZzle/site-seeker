@@ -16,6 +16,7 @@
     import DeleteRecordModal from "$components/utils/DeleteRecordModal.svelte";
     import AddTagModal from "$components/utils/AddTagModal.svelte"
 
+    import { goto } from '$app/navigation';
     import { writable } from 'svelte/store';
     import { onMount } from 'svelte';
 
@@ -32,6 +33,12 @@
     let deleteModalVisible = false;
 
     let tags : any[] = ["Test", "Automation", "Web"];
+
+
+    function visualizeRecord(id: number) {
+        recordId = id;
+        goto(`/web/visualization/${id}`);
+    }
 
     function showTagModal(){
         tagModalVisible = true;
@@ -122,7 +129,8 @@
         </div>
         <div class="records-view__pagination-container__records">
             {#each displayedRecords as record}
-                <RecordCard label={record} startAction={showExecutionModal} editAction={showEditModal}/>
+            <!-- az budeme mit displayed records jako datovy typ z query - tak passneme do visualizeRecord(id) id toho recordu -->
+                <RecordCard label={record} startAction={showExecutionModal} editAction={showEditModal} showAction={() =>{visualizeRecord(1)}}/>
             {/each}
         </div>
         <div class="records-view__pagination-container__bar">
