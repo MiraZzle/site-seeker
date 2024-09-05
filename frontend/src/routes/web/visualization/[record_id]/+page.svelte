@@ -15,12 +15,15 @@
     let nodeTime = "29/07/24 16:24";
     let nodeUrl = "https://www.example.com";
     let recordsCrawled = ["Record 1", "Record 2", "Record 3"]; // Dummy records for the crawled data
+
+    export let data;
+    const { recordId, recordData } = data;
 </script>
 
-<Navbar activePage="Visualization"/>
+<Navbar activePage=""/>
 <div class="visualization-i-container">
     <div class="visualization-i-info">
-        <Header type={3}> Graph of Record with ID 1 </Header>
+        <Header type={3}> Graph of Record with ID {recordId} </Header>
     </div>
 </div>
 <div class="visualization-i-graph">
@@ -60,7 +63,7 @@
 </div>
 
 <style lang="scss">
-    @import "../../../styles/variables.scss";
+    @import "../../../../styles/variables.scss";
 
     .visualization {
 
