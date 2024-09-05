@@ -58,7 +58,6 @@
         </FeatureCard>
     </div>
 </div>
-<Footer />
 
 <style lang="scss">
     @import "../../../styles/variables.scss";
