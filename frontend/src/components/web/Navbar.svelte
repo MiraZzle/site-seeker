@@ -2,7 +2,7 @@
     import Logo from "$components/utils/Logo.svelte";
     import GithubButton from "$components/utils/GithubButton.svelte";
 
-    export let activePage: "Home" | "Records" | "Executor" | "Visualization" | "Api" = "Home";
+    export let activePage: "Home" | "Records" | "Executor" | "Api" | "" = "Home";
 </script>
 
 <nav class="navbar">
@@ -13,7 +13,6 @@
                 <a class="nav-link {activePage === 'Home' ? 'active' : ''}" href="/web/home">Home</a>
                 <a class="nav-link {activePage === 'Records' ? 'active' : ''}" href="/web/records">Records</a>
                 <a class="nav-link {activePage === 'Executor' ? 'active' : ''}" href="/web/executor">Executor</a>
-                <a class="nav-link {activePage === 'Visualization' ? 'active' : ''}" href="/web/visualization">Visualization</a>
                 <a class="nav-link {activePage === 'Api' ? 'active' : ''}" href="/api">API</a>
             </div>
             <GithubButton/>

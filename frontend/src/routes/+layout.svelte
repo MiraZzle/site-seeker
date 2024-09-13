@@ -1,12 +1,11 @@
 <script lang="ts">
     import '$styles/global.scss';
-
-    /*
-    PRO BUDOUCI GENERACE:
-    dolu pridame pak automaticky loading navbaru a footeru
-    zatim to vynechame kvuli testovani
-    */
+    import Footer from '$components/web/Footer.svelte';
 </script>
 
-
-<slot />
+<div id="page-content">
+    <div>
+        <slot />
+    </div>
+    <Footer />
+</div>

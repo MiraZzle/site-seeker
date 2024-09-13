@@ -10,7 +10,10 @@
     import ExecutionCard from "$components/elements/ExecutionCard.svelte";
     import { onMount } from 'svelte';
 
+    export let data;
+    const { recordId, executionData } = data;
     let currentPage: number = 1;
+
     const dummyExecutions: any[] = [
         { label: "Test", status: "Finished", crawledSites: 13, startTime: "29/07/24 16:24", endTime: "29/07/24 16:29" },
         { label: "Test", status: "Finished", crawledSites: 13, startTime: "29/07/24 16:24", endTime: "29/07/24 16:29" },
@@ -40,7 +43,7 @@
 
 <Navbar activePage="Executor"/>
 <div class="execution-info-container">
-    <Header type={2} textAlign="center">Displaying all Executions</Header>
+    <Header type={2} textAlign="center">Displaying Executions Of Record {recordId}</Header>
 </div>
 <div class="execution-view">
     <Card>
@@ -67,7 +70,7 @@
 </div>
 
 <style lang="scss">
-    @import '../../../styles/variables.scss';
+    @import '../../../../styles/variables.scss';
 
     .execution-info-container {
         display: flex;
