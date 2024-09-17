@@ -35,7 +35,7 @@
         } else if (currentPage === totalPages) {
             console.log('Current page is last page');
             if (totalPages === 2) {
-                pagesArray = [, totalPages - 1, totalPages];
+                pagesArray = [totalPages - 1, totalPages];
             } else {
                 pagesArray = [totalPages - 2, totalPages - 1, totalPages];
             }
@@ -52,7 +52,9 @@
         pages.set(pagesArray);
     }
 
-    $: createPages(); // narenderujeme nove stranku, pokud se v ni pouzita promena zmeni
+    $: if (records.length > 0) {
+        createPages();
+    }
 
     function goToPage(page: number) {
         if (page > 0 && page <= pageCount) {
