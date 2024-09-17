@@ -286,40 +286,6 @@ class Model {
 			return null;
 		}
 	}
-	async getLatestExecution(websiteRecordId) {
-		try {
-			const execution = await new Promise((resolve, reject) => {
-				this.db.get(
-					`
-					SELECT * FROM execution_records
-					WHERE websiteRecordId = ?
-					ORDER BY startTime DESC
-					LIMIT 1
-					`,
-					[websiteRecordId],
-					(err, row) => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(row);
-						}
-					}
-				);
-			});
-	
-			return execution ? {
-				id: execution.id,
-				websiteRecordId: execution.websiteRecordId,
-				startTime: execution.startTime,
-				endTime: execution.endTime,
-				crawledCount: execution.crawledCount,
-				status: execution.status,
-			} : null;
-		} catch (err) {
-			console.error(err);
-			return null;
-		}
-	}
 
 	addCrawledData({ executionId, url, crawlTime, title, outgoingLinks }) {
 		this.db.serialize(() => {
