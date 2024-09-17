@@ -7,10 +7,34 @@
 </script>
 
 <div class="input-block">
-<label for={id} class="input-block__label">
-    {description}
-</label>
-<input id={id} type={type} value={value} placeholder={placeholder} class="input-block__input" />
+    <label for={id} class="input-block__label">
+        {description}
+    </label>
+    {#if type === "text"}
+        <input
+            {id}
+            bind:value
+            {placeholder}
+            class="input-block__input"
+            type="text"
+        />
+    {:else if type === "password"}
+        <input
+            {id}
+            bind:value
+            {placeholder}
+            class="input-block__input"
+            type="password"
+        />
+    {:else if type === "number"}
+        <input
+            {id}
+            bind:value
+            {placeholder}
+            class="input-block__input"
+            type="number"
+        />
+    {/if}
 </div>
 
 <style lang="scss">
