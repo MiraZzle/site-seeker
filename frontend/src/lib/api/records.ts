@@ -10,6 +10,6 @@ export async function fetchWebsiteRecords() {
     throw new Error('Failed to fetch website records');
   }
 
-  const result = await response.json();
-  return result;  // assuming the result is already an array of website records
+  const websiteRecords = await response.json();
+  return websiteRecords;
 }
