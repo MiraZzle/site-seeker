@@ -174,6 +174,7 @@ export const cytoscapeStyles: cytoscape.Stylesheet[] = [
 			"arrow-scale": 0.5,
 			"line-color": "#000",
 			width: 1,
+			opacity: 0.5,
 		},
 	},
 ];
