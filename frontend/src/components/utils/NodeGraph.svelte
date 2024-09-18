@@ -15,27 +15,42 @@
   export let updateNodeDetailsCardCallback: (selectedNode: GraphNode) => void;
 
   // Constants and variables
-  const LIVE_MODE_INTERVAL = 5000;
+  const LIVE_MODE_INTERVAL = 1000;
   let graphContainer: HTMLDivElement;
   let cyInstance: cytoscape.Core;
+  let intervalId: number;
 
-  function getFormattedData(domainMode: boolean, liveMode: boolean = false): GraphData {
-    // TODO: add live mode fetching
-    // This is the point where i should also take care of the socket connection
+  function getFormattedData(domainMode: boolean): GraphData {
     return domainMode ? getDomainViewData(fetchedData) : getWebsiteViewData(fetchedData);
   }
 
   // Lifecycle
   onMount(() => {
     // live mode will NEVER be enabled in the first render, so we can safely call the getData function
-    const extractedData: GraphData = getFormattedData(domainMode, liveMode);
+    const extractedData: GraphData = getFormattedData(domainMode);
     createGraph(extractedData)
   });
 
-  $: {
-    liveMode ? console.log("Live mode enabled") : console.log("Static mode disabled");
-    const extractedData: GraphData = getFormattedData(domainMode, liveMode);
+  function startLiveMode(domainModeValue: boolean) {
+    intervalId = setInterval(() => {
+      const extractedData: GraphData = getFormattedData(domainModeValue);
+      showGraph(extractedData);
+    }, LIVE_MODE_INTERVAL);
+    return () => clearInterval(intervalId);
+  }
+
+  function startStaticMode(domainModeValue: boolean) {
+    if (intervalId) clearInterval(intervalId);
+    const extractedData: GraphData = getFormattedData(domainModeValue);
     showGraph(extractedData);
+  }
+
+  $: {
+    if (liveMode) {
+      startLiveMode(domainMode);
+    } else {
+      startStaticMode(domainMode);
+    }
   }
   
   ////////////////////////////////////////////////// GRAPH CONTROL METHODS
