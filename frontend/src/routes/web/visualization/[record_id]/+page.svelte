@@ -6,8 +6,10 @@
     import Card from "$components/utils/Card.svelte";
     import Toggle from "$components/utils/Toggle.svelte";
 	import NodeGraph from "$components/utils/NodeGraph.svelte";
-    import { type ApiResponseData, type GraphNode } from "$types/visualizationTypes";
+    import { type CrawledNode, type GraphNode } from "$types/visualizationTypes";
 	import Button from "$components/elements/typography/Button.svelte";
+    import AddRecordModal from "$components/utils/AddRecordModal.svelte";
+	import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
 
     let liveMode: boolean = false;
     let domainMode: boolean = false;
@@ -17,7 +19,21 @@
 
     let nodeTime: string;
     let nodeUrl: string;
-    let recordsCrawled: string[] = ["Record 1", "Record 2"];
+    let recordsCrawled: string[] = [];
+
+    // Button related variables
+    let addWebsiteRecordModalVisible: boolean = false;
+    let executionStartedModalVisible: boolean = false;
+    let startExecutionId: string = "";
+
+    function handleAddWebsiteRecord() {
+        addWebsiteRecordModalVisible = true;
+    }
+
+    function onStartExecution(websiteRecordId: string) {
+        executionStartedModalVisible = true;
+        startExecutionId = websiteRecordId;
+    }
 
     function convertToTime(time: string, locale: string = "cs-CZ") {
         const date = new Date(parseInt(time));
@@ -35,10 +51,6 @@
         nodeTime = "";
     }
 
-    function populateRecordsCrawled(): void {
-
-    }
-
     function updateDetailsCard(chosenNode: GraphNode): void {
         const selectedNodeData = chosenNode.value;
         const isCrawledNode = chosenNode.classes.includes("uncrawled") ? false : true;
@@ -51,317 +63,19 @@
             selectedNodeCrawled = isCrawledNode
             nodeUrl = selectedNodeUrl;
             nodeTime = convertToTime(selectedNodeCrawlTime);
+            // TODO: there should be multiple records????
+            if (isCrawledNode) {
+                recordsCrawled = [(selectedNodeData as CrawledNode).owner.identifier];
+            }
         }
     }
-
-    // sample data:
-    const sampleFetchedData: ApiResponseData = {
-            "data": {
-            "nodes": [
-                {
-                "title": "Example Domain",
-                "url": "https://example.com/",
-                "crawlTime": "1725827466416",
-                "links": [
-            {
-                "title": "Example Domains",
-                "url": "https://iana.org/domains/example",
-                "crawlTime": "1725827467543"
-            }
-            ],
-            "owner": {
-            "identifier": "4",
-            "label": "Test",
-            "url": "https://www.example.com"
-            }
-        },
-        {
-            "title": "Example Domains",
-            "url": "https://iana.org/domains/example",
-            "crawlTime": "1725827467543",
-            "links": [
-            {
-                "title": "Example Domains",
-                "url": "https://iana.org/domains/example",
-                "crawlTime": "1725827467543"
-            },
-            {
-                "title": "Internet Assigned Numbers Authority",
-                "url": "https://iana.org/",
-                "crawlTime": "1725827468146"
-            },
-            {
-                "title": "Domain Name Services",
-                "url": "https://iana.org/domains",
-                "crawlTime": "1725827468553"
-            },
-            {
-                "title": "Protocol Registries",
-                "url": "https://iana.org/protocols",
-                "crawlTime": "1725827469551"
-            },
-            {
-                "title": "Number Resources",
-                "url": "https://iana.org/numbers",
-                "crawlTime": "1725827470004"
-            },
-            {
-                "title": "About us",
-                "url": "https://iana.org/about",
-                "crawlTime": "1725827470414"
-            },
-            {
-                "title": "RFC 2606:  Reserved Top Level DNS Names ",
-                "url": "https://iana.org/go/rfc2606",
-                "crawlTime": "1725827471006"
-            },
-            {
-                "title": "RFC 6761: Special-Use Domain Names",
-                "url": "https://iana.org/go/rfc6761",
-                "crawlTime": "1725827471640"
-            },
-            {
-                "title": "IANA-managed Reserved Domains",
-                "url": "https://iana.org/domains/reserved",
-                "crawlTime": "1725827472270"
-            },
-            {
-                "title": "Root Zone Management",
-                "url": "https://iana.org/domains/root",
-                "crawlTime": "1725827472669"
-            },
-            {
-                "title": "Intergovernmental Treaty (.INT) Domains",
-                "url": "https://iana.org/domains/int",
-                "crawlTime": "1725827473073"
-            }
-            ],
-            "owner": {
-            "identifier": "4",
-            "label": "Test",
-            "url": "https://www.example.com"
-            }
-        },
-        {
-            "title": "Internet Assigned Numbers Authority",
-            "url": "https://iana.org/",
-            "crawlTime": "1725827468146",
-            "links": [
-            {
-                "title": "Example Domains",
-                "url": "https://iana.org/domains/example",
-                "crawlTime": "1725827467543"
-            },
-            {
-                "title": "Internet Assigned Numbers Authority",
-                "url": "https://iana.org/",
-                "crawlTime": "1725827468146"
-            },
-            {
-                "title": "Domain Name Services",
-                "url": "https://iana.org/domains",
-                "crawlTime": "1725827468553"
-            },
-            {
-                "title": "Protocol Registries",
-                "url": "https://iana.org/protocols",
-                "crawlTime": "1725827469551"
-            },
-            {
-                "title": "Number Resources",
-                "url": "https://iana.org/numbers",
-                "crawlTime": "1725827470004"
-            },
-            {
-                "title": "About us",
-                "url": "https://iana.org/about",
-                "crawlTime": "1725827470414"
-            },
-            {
-                "title": "RFC 2606:  Reserved Top Level DNS Names ",
-                "url": "https://iana.org/go/rfc2606",
-                "crawlTime": "1725827471006"
-            },
-            {
-                "title": "RFC 6761: Special-Use Domain Names",
-                "url": "https://iana.org/go/rfc6761",
-                "crawlTime": "1725827471640"
-            },
-            {
-                "title": "IANA-managed Reserved Domains",
-                "url": "https://iana.org/domains/reserved",
-                "crawlTime": "1725827472270"
-            },
-            {
-                "title": "Root Zone Management",
-                "url": "https://iana.org/domains/root",
-                "crawlTime": "1725827472669"
-            },
-            {
-                "title": "Intergovernmental Treaty (.INT) Domains",
-                "url": "https://iana.org/domains/int",
-                "crawlTime": "1725827473073"
-            }
-            ],
-            "owner": {
-            "identifier": "4",
-            "label": "Test",
-            "url": "https://www.example.com"
-            }
-        },
-        ]
-    }
-    };
-
-    const sampleFetchedDataV2: ApiResponseData = {
-      data: {
-        nodes: [
-            {
-                    title: "Home Page",
-                    url: "https://example-home.com/",
-                    crawlTime: "1725827466416",
-                    links: [
-                    {
-                        title: "About Us",
-                        url: "https://example-home.com/about",
-                        crawlTime: "1725827467543",
-                    },
-                    {
-                        title: "Contact Us",
-                        url: "https://example-home.com/contact",
-                        crawlTime: "1725827468543",
-                    },
-                    ],
-                    owner: {
-                    identifier: "1",
-                    label: "Example Home",
-                    url: "https://example-home.com/",
-                    },
-                },
-                {
-                    title: "About Us",
-                    url: "https://example-home.com/about",
-                    crawlTime: "1725827467543",
-                    links: [
-                    {
-                        title: "Team",
-                        url: "https://example-home.com/team",
-                        crawlTime: "1725827469543",
-                    },
-                    {
-                        title: "Contact Us",
-                        url: "https://example-home.com/contact",
-                        crawlTime: "1725827468543",
-                    },
-                    ],
-                    owner: {
-                    identifier: "1",
-                    label: "Example Home",
-                    url: "https://example-home.com/",
-                    },
-                },
-                {
-                    title: "Contact Us",
-                    url: "https://example-home.com/contact",
-                    crawlTime: "1725827468543",
-                    links: [
-                    {
-                        title: "Home Page",
-                        url: "https://example-home.com/",
-                        crawlTime: "1725827466416",
-                    },
-                    ],
-                    owner: {
-                    identifier: "1",
-                    label: "Example Home",
-                    url: "https://example-home.com/",
-                    },
-                },
-                {
-                    title: "Team",
-                    url: "https://example-home.com/team",
-                    crawlTime: "1725827469543",
-                    links: [
-                    {
-                        title: "Home Page",
-                        url: "https://example-home.com/",
-                        crawlTime: "1725827466416",
-                    },
-                    ],
-                    owner: {
-                    identifier: "1",
-                    label: "Example Home",
-                    url: "https://example-home.com/",
-                    },
-                },
-                {
-                    title: "Products",
-                    url: "https://example-products.com/",
-                    crawlTime: "1725827466416",
-                    links: [
-                    {
-                        title: "Product A",
-                        url: "https://example-products.com/a",
-                        crawlTime: "1725827467543",
-                    },
-                    {
-                        title: "Product B",
-                        url: "https://example-products.com/b",
-                        crawlTime: "1725827468543",
-                    },
-                    ],
-                    owner: {
-                    identifier: "2",
-                    label: "Example Products",
-                    url: "https://example-products.com/",
-                    },
-                },
-                {
-                    title: "Product A",
-                    url: "https://example-products.com/a",
-                    crawlTime: "1725827467543",
-                    links: [
-                    {
-                        title: "Home Page",
-                        url: "https://example-home.com/",
-                        crawlTime: "1725827466416",
-                    },
-                    ],
-                    owner: {
-                    identifier: "2",
-                    label: "Example Products",
-                    url: "https://example-products.com/",
-                    },
-                },
-                {
-                    title: "Product B",
-                    url: "https://example-products.com/b",
-                    crawlTime: "1725827468543",
-                    links: [
-                    {
-                        title: "Product A",
-                        url: "https://example-products.com/a",
-                        crawlTime: "1725827467543",
-                    },
-                    {
-                        title: "External Product",
-                        url: "https://external.com/product",
-                        crawlTime: "1725827469543",
-                    }
-                    ],
-                    owner: {
-                    identifier: "2",
-                    label: "Example Products",
-                    url: "https://example-products.com/",
-                    },
-                },
-                ],
-            },
-    };
 
     export let data;
     const { recordId, recordData } = data;
 </script>
+
+<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} />
+<ExecutionStartedModal bind:showModal={executionStartedModalVisible} id={parseInt(startExecutionId)} />
 
 <Navbar activePage=""/>
 <div class="visualization-i-container">
@@ -370,41 +84,45 @@
     </div>
 </div>
 <div class="visualization-i-graph">
-    <Card>
-        <Header type={2}> Node Details </Header>
-        {#if selectedNodeForDetailsCard}
-        <div class="record-card-info-item">
-            <span class="record-card-info-label">URL</span>
-            <a class="record-card-info-value" href={nodeUrl} target="_blank">{nodeUrl}</a>
-        </div>
-        {#if selectedNodeCrawled}
-        <div class="record-card-info-item">
-            <span class="record-card-info-label">Crawl Time</span>
-            <span class="record-card-info-value">{nodeTime}</span>
-        </div>
-        <div class="record-card-info-item">
-            <span class="record-card-info-label">Records Crawled</span>
-            <SelectInput 
-                options={recordsCrawled} 
-                on:change={
-                    (event) => {
-                        recordSelected = true;
+    <div class="node-details-card">
+        <Card>
+            <Header type={2}> Node Details </Header>
+            {#if selectedNodeForDetailsCard}
+            <div class="record-card-info-item">
+                <span class="record-card-info-label">URL</span>
+                <a class="record-card-info-value" href={nodeUrl} target="_blank">{nodeUrl}</a>
+            </div>
+            {#if selectedNodeCrawled}
+            <div class="record-card-info-item">
+                <span class="record-card-info-label">Crawl Time</span>
+                <span class="record-card-info-value">{nodeTime}</span>
+            </div>
+            <div class="record-card-info-item">
+                <span class="record-card-info-label">Records Crawled</span>
+                <SelectInput 
+                    options={recordsCrawled} 
+                    bind:value={startExecutionId}
+                    on:change={
+                        (event) => {
+                            console.log(startExecutionId);
+                            recordSelected = true;
+                        }
                     }
-                }
-            />
-            <div class="record-card-start-crawl-button">
-                <Button type="primary" disabled={!recordSelected}> Start Crawling </Button>
+                />
+                <div class="record-card-start-execution-button">
+                    <Button type="primary" disabled={!recordSelected} action={() => onStartExecution(startExecutionId)}> Start Execution </Button>
+                </div>
             </div>
-        </div>
-        {:else}
-        <div class="record-card-info-item">
-            <div class="record-card-create-website-record-button">
-                <Button type="primary"> Create Website Record </Button>
+            {:else}
+            <div class="record-card-info-item">
+                <div class="record-card-create-website-record-button">
+                    <Button type="primary" action={handleAddWebsiteRecord}> Add Website Record </Button>
+                </div>
             </div>
-        </div>
-        {/if}
-        {/if}
-    </Card>
+            {/if}
+            {/if}
+        </Card>
+    </div>
     <div class="visualization-i-graph__main">
         <div class="visualization-i-graph__main__toggles">
             <div class="visualization__toggle-container">
@@ -503,15 +221,11 @@
                             line-height: 140%;
                             font-weight: 600;
                             max-width: min-content;
+                            overflow-wrap: break-word;
 
                             a {
                                 text-decoration: none;
                             }
-                        }
-
-                        .record-card-start-crawl-button {
-                            display: flex;
-                            justify-content: flex-start;
                         }
                     }
                 }
