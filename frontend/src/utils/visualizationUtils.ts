@@ -4,7 +4,9 @@ import {
 	type GraphNode,
 	type LinkNode,
 	type CrawledNode,
+	type WebsiteRecord,
 } from "$types/visualizationTypes";
+import axios from "axios";
 
 export function applyLayout(cy: cytoscape.Core) {
 	if (!cy) return;
@@ -27,7 +29,7 @@ export function getDomainViewData(rawData: ApiResponseData): GraphData {
 
 	const extractedNodes = rawData.data.nodes;
 	const domainNodeMap = new Map<string, GraphNode>();
-	const domainLinks = new Set<{ source: string; target: string }>();
+	const domainLinks = new Set<string>();
 
 	extractedNodes.forEach((node: CrawledNode) => {
 		const domain = extractDomain(node.url);
@@ -50,8 +52,12 @@ export function getDomainViewData(rawData: ApiResponseData): GraphData {
 		const sourceDomain = extractDomain(node.url);
 		node.links.forEach((link: LinkNode) => {
 			const targetDomain = extractDomain(link.url);
-			if (sourceDomain !== targetDomain) {
-				domainLinks.add({ source: sourceDomain, target: targetDomain });
+
+			const [domain1, domain2] = [sourceDomain, targetDomain].sort();
+			const edgeKey = `${domain1}--${domain2}`;
+
+			if (domain1 !== domain2 && !domainLinks.has(edgeKey)) {
+				domainLinks.add(edgeKey);
 			}
 
 			if (!domainNodeMap.has(targetDomain)) {
@@ -74,14 +80,19 @@ export function getDomainViewData(rawData: ApiResponseData): GraphData {
 		});
 	});
 
-	const allNodes = Array.from(domainNodeMap.values());
-	const links = Array.from(domainLinks);
-	return { nodes: allNodes, links };
+	const links = Array.from(domainLinks).map((edge) => {
+		const [source, target] = edge.split("--");
+		return { source, target };
+	});
+	const nodes = Array.from(domainNodeMap.values());
+	
+	return { nodes, links };
 }
 
 export function getWebsiteViewData(rawData: ApiResponseData): GraphData {
 	const nodeMap = new Map<string, GraphNode>();
 	const extractedNodes = rawData.data.nodes;
+	const uniqueLinks = new Set<string>();
 
 	const crawledNodes: GraphNode[] = extractedNodes.map((node: CrawledNode) => ({
 		id: node.url,
@@ -93,6 +104,7 @@ export function getWebsiteViewData(rawData: ApiResponseData): GraphData {
 		nodeMap.set(node.id, node);
 	});
 
+	// Uncrawled nodes (link nodes)
 	extractedNodes.forEach((node: CrawledNode) => {
 		node.links.forEach((link: LinkNode) => {
 			if (!nodeMap.has(link.url)) {
@@ -105,16 +117,25 @@ export function getWebsiteViewData(rawData: ApiResponseData): GraphData {
 		});
 	});
 
-	const allNodes = Array.from(nodeMap.values());
-
-	const links = extractedNodes.flatMap((node: CrawledNode) =>
-		node.links.map((link: LinkNode) => ({
-			source: node.url,
-			target: link.url,
-		}))
-	);
-
-	return { nodes: allNodes, links };
+	
+	// Process edges and store them in the uniqueLinks set
+	extractedNodes.forEach((node: CrawledNode) => {
+		node.links.forEach((link: LinkNode) => {
+			const [source, target] = [node.url, link.url].sort();
+			const edgeKey = `${source}--${target}`; // Create a unique key for the edge
+			
+			uniqueLinks.add(edgeKey);
+		});
+	});
+	
+	// Convert the links to edges
+	const links = Array.from(uniqueLinks).map((edge) => {
+		const [source, target] = edge.split("--");
+		return { source, target };
+	});
+	const nodes = Array.from(nodeMap.values());
+	
+	return { nodes, links };
 }
 
 export function getCytoscapeNodes(graphData: GraphData): cytoscape.NodeDefinition[] {
@@ -145,9 +166,9 @@ export const cytoscapeStyles: cytoscape.Stylesheet[] = [
 		selector: "node",
 		style: {
 			label: "data(value.url)",
-			"font-size": 5,
-			width: 20,
-			height: 20,
+			"font-size": 10,
+			width: 25,
+			height: 25,
 			color: "black",
 			"text-valign": "top",
 			"text-halign": "center",
@@ -172,9 +193,23 @@ export const cytoscapeStyles: cytoscape.Stylesheet[] = [
 			"target-arrow-shape": "triangle",
 			"target-arrow-color": "#000",
 			"arrow-scale": 0.5,
-			"line-color": "#000",
+			"line-color": "grey",
 			width: 1,
 			opacity: 0.5,
 		},
 	},
 ];
+
+export async function getWebsiteRecordsByNodeId(
+	nodeId: string
+): Promise<WebsiteRecord[]> {
+	try {
+		const response = await axios.get(
+			`http://localhost:3000/api/websiteRecords/${nodeId}`
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching website records:", error);
+		throw error;
+	}
+}
