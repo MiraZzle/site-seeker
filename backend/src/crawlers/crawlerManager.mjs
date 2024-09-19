@@ -14,7 +14,7 @@ class CrawlerManager {
 		//TODO: Remove the status column from execution
 		let execution = {
 			websiteRecordId: websiteRecord.id,
-			startTime: new Date(),
+			startTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
 			endTime: null,
 			crawledCount: 0,
 			status: "crawling"
@@ -29,7 +29,7 @@ class CrawlerManager {
 				this.model.addCrawledData(message.crawledData);
 			} else if (message.status === "completed") {
 				this.model.toggleIsBeingCrawled(websiteRecord.id);
-				execution.endTime = new Date();
+				execution.endTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 				execution.status = "completed"
 				this.model.updateExecution(execution);
 				if (websiteRecord.isActive) {
