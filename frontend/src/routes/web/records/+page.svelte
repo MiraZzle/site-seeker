@@ -49,6 +49,10 @@
 
     let deletedRecordId = 0;
 
+    function showCreateRecordModal() {
+        createModalVisible = true;
+    }
+
     function showDeleteModal(id: number) {
         deletedRecordId = id;
         deleteModalVisible = true;
@@ -202,9 +206,7 @@
     <Button
         type="primary"
         actionType="action"
-        action={() => {
-            createModalVisible = true;
-        }}
+        action={() => showCreateRecordModal()}
     >
         Create Website Record
     </Button>
@@ -238,8 +240,8 @@
                     label={record.label}
                     periodicity={record.periodicity}
                     tags={record.tags}
-                    time={record.latestExecution.startTime}
-                    status={record.latestExecution.status}
+                    time={new Date(record.latestExecution?.startTime).toString()}
+                    status={record.latestExecution?.status}
                     startAction={() => showExecutionModal(record.id)}
                     editAction={() => showEditModal(record)}
                     showAction={() => {
