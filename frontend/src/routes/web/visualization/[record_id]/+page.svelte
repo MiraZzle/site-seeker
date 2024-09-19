@@ -75,7 +75,7 @@
     const { recordId, recordData } = data;
 </script>
 
-<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} />
+<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} url={nodeUrl} />
 <ExecutionStartedModal bind:showModal={executionStartedModalVisible} id={parseInt(startExecutionId)} />
 
 <Navbar activePage=""/>

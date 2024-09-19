@@ -175,16 +175,10 @@
         console.log(filterLabel);
         loadRecords(1);
     }
-
-
 </script>
 
 <AddTagModal bind:showModal={tagModalVisible} action={addTag} />
-<AddRecordModal
-    bind:showModal={createModalVisible}
-    {getWebsiteRecords}
-    {currentPage}
-/>
+<AddRecordModal bind:showModal={createModalVisible} getWebsiteRecords={() => getWebsiteRecords(currentPage)} />
 <ExecutionStartedModal bind:showModal={executionModalVisible} id={chosenRecordForExecution} />
 {#key currentRecord?.id}
     <EditRecordModal
