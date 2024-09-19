@@ -44,6 +44,13 @@
 
     let tags: any[] = ["Test", "Automation", "Web"];
 
+    let deletedRecordId = 0;
+
+    function showDeleteModal(id) {
+        deletedRecordId = id;
+        deleteModalVisible = true;
+    }
+
     function visualizeRecord(id: number) {
         recordId = id;
         goto(`/web/visualization/${id}`);
@@ -148,7 +155,7 @@
     onMount(async () => {
         try {
             loading = true;
-            await getWebsiteRecords(currentPage)
+            await getWebsiteRecords(currentPage);
         } catch (err: any) {
             error = err.message;
         } finally {
@@ -163,17 +170,25 @@
 </script>
 
 <AddTagModal bind:showModal={tagModalVisible} action={addTag} />
-<AddRecordModal bind:showModal={createModalVisible} getWebsiteRecords={getWebsiteRecords} currentPage={currentPage}/>
+<AddRecordModal
+    bind:showModal={createModalVisible}
+    {getWebsiteRecords}
+    {currentPage}
+/>
 <ExecutionStartedModal bind:showModal={executionModalVisible} />
 {#key currentRecord.id}
     <EditRecordModal
         bind:showModal={editModalVisible}
         record={currentRecord}
-        getWebsiteRecords={getWebsiteRecords}
-        currentPage={currentPage}
+        {getWebsiteRecords}
+        {currentPage}
+        showDeleteModal={showDeleteModal}
     />
 {/key}
-<DeleteRecordModal bind:showModal={deleteModalVisible} id={recordId} />
+<DeleteRecordModal
+    bind:showModal={deleteModalVisible}
+    id={deletedRecordId}
+/>
 
 <Navbar activePage="Records" />
 <div class="records-cta">

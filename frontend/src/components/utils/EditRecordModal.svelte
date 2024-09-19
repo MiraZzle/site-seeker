@@ -8,61 +8,94 @@
     import TextAreaInput from "./TextAreaInput.svelte";
 
     const timeOptions = ["Seconds", "Minutes", "Hours", "Days"];
-    
+
     // Export variables to populate the fields
     export let currentPage;
     export let getWebsiteRecords;
     export let record;
-    export let selectedTime = timeOptions[1];  // Default to "Minutes"
+    export let selectedTime = timeOptions[1]; // Default to "Minutes"
     export let showModal = true;
+    export let showDeleteModal; // Function to show DeleteRecordModal
     export let startingUrl = record.url;
     export let boundaryRegExp = record.boundaryRegExp;
     export let periodicity = record.periodicity;
     export let label = record.label;
-    let tags = record.tags ? record.tags.join(", ") : "";  // Safe fallback to an empty string
+    let tags = record.tags ? record.tags.join(", ") : ""; // Safe fallback to an empty string
     export let isActive = record.isActive;
 
     // Function to handle form submission
     async function handleUpdate() {
-    // Prepare the updated record payload
-    const updatedRecord = {
-        id: record.id,
-        url: startingUrl,
-        boundaryRegExp: boundaryRegExp,
-        periodicity: periodicity,
-        label: label,
-        tags: tags.split(",").map(tag => tag.trim()),  // Convert back to array
-        isActive: isActive
-    };
+        const updatedRecord = {
+            id: record.id,
+            url: startingUrl,
+            boundaryRegExp: boundaryRegExp,
+            periodicity: periodicity,
+            label: label,
+            tags: tags.split(",").map((tag) => tag.trim()), // Convert back to array
+            isActive: isActive,
+        };
 
-    try {
-        // Send the PUT request to the server
-        const response = await fetch(`http://localhost:3000/api/websiteRecords/update/${record.id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(updatedRecord)
-        });
+        try {
+            const response = await fetch(
+                `http://localhost:3000/api/websiteRecords/update/${record.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(updatedRecord),
+                },
+            );
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log("Record updated successfully:", data);
-            // Reload records after successful update
-            getWebsiteRecords(currentPage);  // Call loadRecords to refresh the data
-            showModal = false;  // Close modal after success
-        } else {
-            console.error("Failed to update record:", response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Record updated successfully:", data);
+                getWebsiteRecords(currentPage); // Reload records after successful update
+                showModal = false; // Close modal
+            } else {
+                console.error("Failed to update record:", response.status);
+            }
+        } catch (error) {
+            console.error("Error updating record:", error);
         }
-    } catch (error) {
-        console.error("Error updating record:", error);
     }
-}
+
+    // Function to delete the record
+    async function handleDelete() {
+        try {
+            const response = await fetch(
+                `http://localhost:3000/api/websiteRecords/delete/${record.id}`,
+                {
+                    method: "DELETE",
+                },
+            );
+
+            if (response.ok) {
+                console.log(
+                    `Record with ID ${record.id} deleted successfully.`,
+                );
+                showDeleteModal(record.id); // Show confirmation modal
+                getWebsiteRecords(currentPage); // Reload records
+                showModal = false; // Close this modal
+            } else {
+                console.error("Failed to delete record:", response.status);
+            }
+        } catch (error) {
+            console.error("Error deleting record:", error);
+        }
+    }
 </script>
 
-<Modal bind:open={showModal} width="480px" closeOnEscape={true} closeOnOutsideClick={true}>
+<Modal
+    bind:open={showModal}
+    width="480px"
+    closeOnEscape={true}
+    closeOnOutsideClick={true}
+>
     <div class="modal-desc">
-        <Header type={2} color="black" textAlign="center">Edit Existing Record</Header>
+        <Header type={2} color="black" textAlign="center"
+            >Edit Existing Record</Header
+        >
     </div>
     <TextInput description="Starting URL" bind:value={startingUrl} />
     <TextInput description="Boundary RegExp" bind:value={boundaryRegExp} />
@@ -70,17 +103,27 @@
         <TextInput description="Periodicity" bind:value={periodicity} />
         <SelectInput options={timeOptions} bind:value={selectedTime} />
     </div>
-    <TextInput description="Label" bind:value={label} placeholder="Enter a descriptive label" />
-    <TextAreaInput id="tags" label="Tags" bind:value={tags} placeholder="Enter tags separated by commas" />
+    <TextInput
+        description="Label"
+        bind:value={label}
+        placeholder="Enter a descriptive label"
+    />
+    <TextAreaInput
+        id="tags"
+        label="Tags"
+        bind:value={tags}
+        placeholder="Enter tags separated by commas"
+    />
     <div class="active-container">
         <span class="active-container__label">Active</span>
         <Toggle bind:checked={isActive} />
     </div>
-    <Button type="dark"> View all executions </Button>  
-    <div class="action-buttons">
-        <Button type="dark" width="full" action={handleUpdate}> Update Record </Button>
-        <Button type="danger" width="full"> Delete Record </Button>
-    </div>
+    <Button type="dark" width="full" action={handleUpdate}>
+        Update Record
+    </Button>
+    <Button type="danger" width="full" action={handleDelete}>
+        Delete Record
+    </Button>
 </Modal>
 
 <style lang="scss">
