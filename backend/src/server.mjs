@@ -7,9 +7,18 @@ import { WebSocketServer } from "ws";
 import sqlite3 from "sqlite3";
 import { fileURLToPath, pathToFileURL } from "url";
 import path from "path";
+import cors from "cors";
 
 import { createHandler } from "graphql-http/lib/use/express";
-import { graphql, GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList, GraphQLBoolean } from 'graphql';
+import {
+	graphql,
+	GraphQLSchema,
+	GraphQLObjectType,
+	GraphQLString,
+	GraphQLID,
+	GraphQLList,
+	GraphQLBoolean,
+} from "graphql";
 import { ruruHTML } from "ruru/server";
 
 // Define this file's __filename and __dirname
@@ -19,11 +28,21 @@ const __dirname = path.dirname(__filename);
 // Define all the necessary paths
 const dbPath = path.join(__dirname, "./db/crawler.db");
 const modelPath = pathToFileURL(path.join(__dirname, "./models/model.mjs")).href;
-const additionControllerPath = pathToFileURL(path.join(__dirname, "./controllers/additionController.mjs")).href;
-const deletionControllerPath = pathToFileURL(path.join(__dirname, "./controllers/deletionController.mjs")).href;
-const updateControllerPath = pathToFileURL(path.join(__dirname, "./controllers/updateController.mjs")).href;
-const dataFormatterPath = pathToFileURL(path.join(__dirname, "./utils/dataFormatter.mjs")).href;
-const crawlerManagerPath = pathToFileURL(path.join(__dirname, "./crawlers/crawlerManager.mjs")).href;
+const additionControllerPath = pathToFileURL(
+	path.join(__dirname, "./controllers/additionController.mjs")
+).href;
+const deletionControllerPath = pathToFileURL(
+	path.join(__dirname, "./controllers/deletionController.mjs")
+).href;
+const updateControllerPath = pathToFileURL(
+	path.join(__dirname, "./controllers/updateController.mjs")
+).href;
+const dataFormatterPath = pathToFileURL(
+	path.join(__dirname, "./utils/dataFormatter.mjs")
+).href;
+const crawlerManagerPath = pathToFileURL(
+	path.join(__dirname, "./crawlers/crawlerManager.mjs")
+).href;
 
 // Dynamically import modules
 const { default: Model } = await import(modelPath);
@@ -44,6 +63,7 @@ const port = 3000;
 
 // Middleware to parse JSON data
 app.use(express.json());
+app.use(cors());
 
 // Swagger API documentation setup
 const options = {
@@ -127,6 +147,15 @@ app.get("/", (req, res) => {
  */
 app.get("/api/websiteRecords/", async (req, res) => {
 	const result = await model.getAllWebsiteRecords();
+	if (result) {
+		res.status(200).json(result);
+	} else {
+		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+	}
+});
+
+app.get("/api/websiteRecords/:id", async (req, res) => {
+	const result = await model.getWebsiteRecordByNodeId(req.params.id);
 	if (result) {
 		res.status(200).json(result);
 	} else {
@@ -222,44 +251,45 @@ const WebPageType = new GraphQLObjectType({
 		regexp: { type: GraphQLString },
 		tags: { type: new GraphQLList(GraphQLString) },
 		active: { type: GraphQLBoolean },
-		periodicity: {type: GraphQLString}
-	}
+		periodicity: { type: GraphQLString },
+	},
 });
 
 const NodeType = new GraphQLObjectType({
 	name: "Node",
 	fields: () => ({
+		id: { type: GraphQLID },
 		title: { type: GraphQLString },
 		url: { type: GraphQLString },
 		crawlTime: { type: GraphQLString },
 		links: { type: new GraphQLList(NodeType) },
-		owner: { type: WebPageType }
-	})
+		owner: { type: WebPageType },
+	}),
 });
 
 const schema = new GraphQLSchema({
 	query: new GraphQLObjectType({
-		name: 'Query',
+		name: "Query",
 		fields: {
 			websites: {
 				type: new GraphQLList(WebPageType),
 				resolve: async () => {
 					const records = await model.getAllWebsiteRecords();
-					return records.map(record => ({
+					return records.map((record) => ({
 						identifier: record.id,
 						label: record.label,
 						url: record.url,
 						regexp: record.boundaryRegExp,
 						tags: record.tags,
 						active: record.isActive,
-						periodicity: record.periodicity
+						periodicity: record.periodicity,
 					}));
-				}
+				},
 			},
 			nodes: {
 				type: new GraphQLList(NodeType),
 				args: {
-					webPages: { type: new GraphQLList(GraphQLID) }
+					webPages: { type: new GraphQLList(GraphQLID) },
 				},
 				resolve: async (_, { webPages }) => {
 					const nodes = await model.getNodesByWebPageIds(webPages);
