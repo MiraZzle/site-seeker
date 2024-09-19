@@ -22,11 +22,11 @@
 
     import { fetchWebsiteRecords } from "$lib/api/records";
 
-    let websiteRecords = [];
-    let filteredWebsiteRecords = [];
+    let websiteRecords: WebRecord[] = [];
+    let filteredWebsiteRecords: WebRecord[] = [];
     let loading = true;
     let error = null;
-    let currentRecord = {};
+    let currentRecord: WebRecord;
 
     // Filters
     let filterURL = "";
@@ -46,7 +46,7 @@
 
     let deletedRecordId = 0;
 
-    function showDeleteModal(id) {
+    function showDeleteModal(id: number) {
         deletedRecordId = id;
         deleteModalVisible = true;
     }
@@ -60,7 +60,7 @@
         tagModalVisible = true;
     }
 
-    function showEditModal(record) {
+    function showEditModal(record: WebRecord) {
         currentRecord = record;
         editModalVisible = true;
     }
@@ -147,7 +147,7 @@
         displayedRecords = sortedRecords.slice(start, end);
     }
 
-    async function getWebsiteRecords(currentPage) {
+    async function getWebsiteRecords(currentPage: number) {
         websiteRecords = await fetchWebsiteRecords();
         loadRecords(currentPage);
     }
@@ -176,7 +176,7 @@
     {currentPage}
 />
 <ExecutionStartedModal bind:showModal={executionModalVisible} />
-{#key currentRecord.id}
+{#key currentRecord?.id}
     <EditRecordModal
         bind:showModal={editModalVisible}
         record={currentRecord}

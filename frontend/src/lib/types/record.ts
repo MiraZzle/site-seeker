@@ -1,7 +1,15 @@
 type WebRecord = {
+  id: number
+  url: string
+  boundaryRegExp: string
   label: string
   periodicity: number
-  execFinished: boolean
-  lastExecTime: string
+  latestExecution: {
+    id: number
+    startTime: string,
+    endTime: string,
+    status: string
+  }
+  isActive: boolean,
   tags: string[]
 }

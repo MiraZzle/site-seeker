@@ -9,8 +9,8 @@
     import TextAreaInput from "./TextAreaInput.svelte";
 
     const timeOptions = ["Seconds", "Minutes", "Hours", "Days"];
-    export let currentPage;
-    export let getWebsiteRecords;
+    export let currentPage: number;
+    export let getWebsiteRecords: (currentPage: number) => Promise<void>;
     export let selectedTime = timeOptions[0];
     export let showModal = false;
 
@@ -91,8 +91,12 @@
     closeOnOutsideClick={true}
 >
     <div class="modal-desc">
-        <Header type={2} color="black" textAlign="center">Add New Site Record</Header>
-        <Paragraph type={3} color="grayLight" textAlign="center">Define Settings for Crawling</Paragraph>
+        <Header type={2} color="black" textAlign="center"
+            >Add New Site Record</Header
+        >
+        <Paragraph type={3} color="grayLight" textAlign="center"
+            >Define Settings for Crawling</Paragraph
+        >
     </div>
     <TextInput
         bind:value={url}
@@ -127,7 +131,7 @@
         <span class="active-container__label">Active</span>
         <Toggle bind:checked={isActive} />
     </div>
-    <Button type="dark" actionType="submit" action={addRecord}>
+    <Button type="dark" actionType="action" action={addRecord}>
         Add Record
     </Button>
 </Modal>

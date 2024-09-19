@@ -10,23 +10,23 @@
     const timeOptions = ["Seconds", "Minutes", "Hours", "Days"];
 
     // Export variables to populate the fields
-    export let currentPage;
-    export let getWebsiteRecords;
-    export let record;
+    export let currentPage: number;
+    export let getWebsiteRecords: (currentPage: number) => Promise<void>;
+    export let record: WebRecord;
     export let showModal = true;
-    export let showDeleteModal; // Function to show DeleteRecordModal
-    export let startingUrl = record.url;
-    export let boundaryRegExp = record.boundaryRegExp;
-    export let periodicity = record.periodicity; // this is in seconds
-    export let label = record.label;
-    let tags = record.tags ? record.tags.join(", ") : ""; // Safe fallback to an empty string
-    export let isActive = record.isActive;
+    export let showDeleteModal: (id: number) => void;
+    export let startingUrl = record?.url;
+    export let boundaryRegExp = record?.boundaryRegExp;
+    export let periodicity = record?.periodicity; // this is in seconds
+    export let label = record?.label;
+    let tags = record?.tags ? record.tags.join(", ") : ""; // Safe fallback to an empty string
+    export let isActive = record?.isActive;
 
     let selectedTime = timeOptions[0]; // Default to "Seconds"
-    let displayedPeriodicity = periodicity;
+    let displayedPeriodicity: string = convertPeriodicity(periodicity).toString();
 
     // Function to convert seconds to the appropriate time unit
-    function convertPeriodicity(seconds) {
+    function convertPeriodicity(seconds: number) {
         if (seconds < 60) {
             selectedTime = "Seconds";
             return seconds;
@@ -44,7 +44,7 @@
 
     // When the modal opens, convert periodicity to the appropriate unit
     $: {
-        displayedPeriodicity = convertPeriodicity(periodicity);
+        displayedPeriodicity = convertPeriodicity(periodicity).toString();
     }
 
     // Function to handle form submission
