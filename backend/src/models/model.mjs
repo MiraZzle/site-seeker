@@ -101,7 +101,7 @@ class Model {
 		};
 	}
 
-	async getAllWebsiteRecords() {
+	/* async getAllWebsiteRecords() {
 		try {
 			let rows = await new Promise((resolve, reject) => {
 				this.db.all("SELECT * FROM website_records", (err, rows) => {
@@ -114,6 +114,50 @@ class Model {
 			});
 			const result = Model.parseRows(rows);
 			return result;
+		} catch (err) {
+			console.error(err);
+			return [];
+		}
+	} */
+	async getAllWebsiteRecords() {
+		const query = `
+			SELECT wr.*, er.id as executionId, er.startTime as executionStartTime, er.endTime as executionEndTime, er.status as executionStatus
+			FROM website_records wr
+			LEFT JOIN execution_records er
+			ON wr.id = er.websiteRecordId
+			AND er.startTime = (
+				SELECT MAX(startTime)
+				FROM execution_records
+				WHERE websiteRecordId = wr.id
+			)
+		`;
+		try {
+			const rows = await new Promise((resolve, reject) => {
+				this.db.all(query, (err, rows) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
+				});
+			});
+	
+			return rows.map((row) => ({
+				id: row.id,
+				url: row.url,
+				boundaryRegExp: row.boundaryRegExp,
+				periodicity: row.periodicity,
+				label: row.label,
+				isActive: row.isActive,
+				tags: JSON.parse(row.tags),
+				isBeingCrawled: row.isBeingCrawled,
+				latestExecution: row.executionId ? {
+					id: row.executionId,
+					startTime: row.executionStartTime,
+					endTime: row.executionEndTime,
+					status: row.executionStatus
+				} : null
+			}));
 		} catch (err) {
 			console.error(err);
 			return [];

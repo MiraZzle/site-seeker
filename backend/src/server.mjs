@@ -12,6 +12,8 @@ import { createHandler } from "graphql-http/lib/use/express";
 import { graphql, GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList, GraphQLBoolean } from 'graphql';
 import { ruruHTML } from "ruru/server";
 
+import cors from "cors"
+
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +43,10 @@ const app = express();
 const server = http.createServer(app);
 const wsServer = new WebSocketServer({ server });
 const port = 3000;
+
+app.use(cors({
+	origin: '*' // Replace this with the URL of your frontend
+}));
 
 // Middleware to parse JSON data
 app.use(express.json());

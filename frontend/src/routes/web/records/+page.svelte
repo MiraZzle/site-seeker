@@ -14,17 +14,27 @@
     import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
     import EditRecordModal from "$components/utils/EditRecordModal.svelte";
     import DeleteRecordModal from "$components/utils/DeleteRecordModal.svelte";
-    import AddTagModal from "$components/utils/AddTagModal.svelte"
+    import AddTagModal from "$components/utils/AddTagModal.svelte";
 
-    import { goto } from '$app/navigation';
-    import { writable } from 'svelte/store';
-    import { onMount } from 'svelte';
+    import { goto } from "$app/navigation";
+    import { writable } from "svelte/store";
+    import { onMount } from "svelte";
+
+    import { fetchWebsiteRecords } from "$lib/api/records";
+
+    let websiteRecords: WebRecord[] = [];
+    let filteredWebsiteRecords: WebRecord[] = [];
+    let loading = true;
+    let error = null;
+    let currentRecord: WebRecord;
+
+    // Filters
+    let filterURL = "";
+    let filterLabel = "";
+    let filterTags: string[] = [];
 
     let recordId = 1;
     let currentPage: number = 1;
-    const dummyRecords : any[] = [
-        1,2,3,4,5,6,7,8,9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
-    ]
 
     let createModalVisible = false;
     let tagModalVisible = false;
@@ -32,115 +42,219 @@
     let editModalVisible = false;
     let deleteModalVisible = false;
 
-    let tags : any[] = ["Test", "Automation", "Web"];
+    let tags: any[] = ["Test", "Automation", "Web"];
 
+    let deletedRecordId = 0;
+
+    function showDeleteModal(id: number) {
+        deletedRecordId = id;
+        deleteModalVisible = true;
+    }
 
     function visualizeRecord(id: number) {
         recordId = id;
         goto(`/web/visualization/${id}`);
     }
 
-    function showTagModal(){
+    function showTagModal() {
         tagModalVisible = true;
     }
 
-    function showEditModal(){
+    function showEditModal(record: WebRecord) {
+        currentRecord = record;
         editModalVisible = true;
     }
 
-    function showExecutionModal(){
+    function showExecutionModal() {
         executionModalVisible = true;
     }
 
     function addTag(tagName: string) {
-        tags = [...tags, tagName];
+        if (!filterTags.includes(tagName)) {
+            filterTags = [...filterTags, tagName];
+        }
     }
 
     function removeTag(tagName: string) {
-        console.log('Removing tag', tagName);
-        tags = tags.filter(tag => tag !== tagName);
+        filterTags = filterTags.filter((tag) => tag !== tagName);
     }
 
-    let totalRecords = dummyRecords.length;
+    let recordsPerPage = 5;
 
     const sortingOptions = [
-        'URL ascending',
-        'URL descending',
-        'Crawled ascending',
-        'Crawled descending'
+        "URL ascending",
+        "URL descending",
+        "Crawled ascending",
+        "Crawled descending",
     ];
 
     let selectedSortingOption = writable(sortingOptions[0]);
 
     function handleSortSelect(option: string) {
-        console.log('Selected option', option);
         selectedSortingOption.set(option);
+        loadRecords(1);
     }
 
-    let displayedRecords : any[] = [];
+    let displayedRecords: any[] = [];
 
     function loadRecords(newPage: number) {
-        console.log('Loading records');
         currentPage = newPage;
-        console.log('Current page', currentPage);
-        let topRange = currentPage * 5 < totalRecords ? currentPage * 5 : totalRecords;
-        displayedRecords = dummyRecords.slice((currentPage - 1) * 5, topRange);
-        console.log(displayedRecords);
-        return displayedRecords;
+
+        // Apply filtering based on URL, Label, and Tags
+        filteredWebsiteRecords = websiteRecords.filter((record) => {
+            const matchesURL =
+                !filterURL ||
+                record.url.toLowerCase().includes(filterURL.toLowerCase());
+            const matchesLabel =
+                !filterLabel ||
+                record.label.toLowerCase().includes(filterLabel.toLowerCase());
+            const matchesTags =
+                filterTags.length === 0 ||
+                filterTags.every((tag) =>
+                    record.tags.some(
+                        (recordTag) =>
+                            recordTag.toLowerCase() === tag.toLowerCase(),
+                    ),
+                ); // Compare tags case-insensitively
+
+            return matchesURL && matchesLabel && matchesTags;
+        });
+
+        let sortedRecords = [...filteredWebsiteRecords]; // Make a copy of the filtered records
+
+        // Apply sorting based on the selected sorting option
+        if ($selectedSortingOption === "URL ascending") {
+            sortedRecords.sort((a, b) => a.url.localeCompare(b.url));
+        } else if ($selectedSortingOption === "URL descending") {
+            sortedRecords.sort((a, b) => b.url.localeCompare(a.url));
+        } else if ($selectedSortingOption === "Crawled ascending") {
+            sortedRecords.sort((a, b) => {
+                const timeA = a.latestExecution?.startTime || "";
+                const timeB = b.latestExecution?.startTime || "";
+                return new Date(timeA).getTime() - new Date(timeB).getTime();
+            });
+        } else if ($selectedSortingOption === "Crawled descending") {
+            sortedRecords.sort((a, b) => {
+                const timeA = a.latestExecution?.startTime || "";
+                const timeB = b.latestExecution?.startTime || "";
+                return new Date(timeB).getTime() - new Date(timeA).getTime();
+            });
+        }
+
+        // Paginate the sorted records
+        const start = (currentPage - 1) * recordsPerPage;
+        const end = start + recordsPerPage;
+        displayedRecords = sortedRecords.slice(start, end);
     }
 
-    onMount(() => {
+    async function getWebsiteRecords(currentPage: number) {
+        websiteRecords = await fetchWebsiteRecords();
         loadRecords(currentPage);
+    }
+
+    onMount(async () => {
+        try {
+            loading = true;
+            await getWebsiteRecords(currentPage);
+        } catch (err: any) {
+            error = err.message;
+        } finally {
+            loading = false;
+        }
     });
 
     function handleFilter() {
-        console.log('Filtering records');
+        console.log(filterLabel);
+        loadRecords(1);
     }
-
 </script>
 
-<AddTagModal bind:showModal={tagModalVisible} action={addTag}/>
-<AddRecordModal bind:showModal={createModalVisible}/>
-<ExecutionStartedModal bind:showModal={executionModalVisible}/>
-<EditRecordModal bind:showModal={editModalVisible}/>
-<DeleteRecordModal bind:showModal={deleteModalVisible} id={recordId}/>
+<AddTagModal bind:showModal={tagModalVisible} action={addTag} />
+<AddRecordModal
+    bind:showModal={createModalVisible}
+    {getWebsiteRecords}
+    {currentPage}
+/>
+<ExecutionStartedModal bind:showModal={executionModalVisible} />
+{#key currentRecord?.id}
+    <EditRecordModal
+        bind:showModal={editModalVisible}
+        record={currentRecord}
+        {getWebsiteRecords}
+        {currentPage}
+        showDeleteModal={showDeleteModal}
+    />
+{/key}
+<DeleteRecordModal
+    bind:showModal={deleteModalVisible}
+    id={deletedRecordId}
+/>
 
-<Navbar activePage="Records"/>
+<Navbar activePage="Records" />
 <div class="records-cta">
-    <Header type={3}> Your Web Records </Header>
-    <Button type="primary" actionType="action" action={() => {createModalVisible = true}}> Create Website Record </Button>
+    <Header type={3}>Your Web Records</Header>
+    <Button
+        type="primary"
+        actionType="action"
+        action={() => {
+            createModalVisible = true;
+        }}
+    >
+        Create Website Record
+    </Button>
 </div>
 <div class="records-view">
     <Card>
-        <TextInput description="URL" id="url"/>
-        <TextInput description="Label" id="label"/>
+        <TextInput bind:value={filterURL} description="URL" id="url" />
+        <TextInput bind:value={filterLabel} description="Label" id="label" />
         Tags
         <div class="records-view__tags">
-            <TagButton action={() => {tagModalVisible = true}}/>
-            {#each tags as tag}
-                <Tag name={tag} removeTagAction={removeTag}/>
+            {#each filterTags as tag}
+                <Tag name={tag} removeTagAction={removeTag} />
             {/each}
+            <TagButton action={showTagModal} />
+            <!-- Otevře modal pro přidání tagů -->
         </div>
-        <Button type="dark"> Filter </Button>
+        <Button type="dark" action={handleFilter}>Filter</Button>
     </Card>
     <div class="records-view__pagination-container">
         <div class="records-view__pagination-container__sorting">
-            <SortOptions options={sortingOptions} bind:selectedOption={$selectedSortingOption} onSelect={handleSortSelect} />
+            <SortOptions
+                options={sortingOptions}
+                bind:selectedOption={$selectedSortingOption}
+                onSelect={handleSortSelect}
+            />
         </div>
         <div class="records-view__pagination-container__records">
             {#each displayedRecords as record}
-            <!-- az budeme mit displayed records jako datovy typ z query - tak passneme do visualizeRecord(id) id toho recordu -->
-                <RecordCard label={record} startAction={showExecutionModal} editAction={showEditModal} showAction={() =>{visualizeRecord(1)}}/>
+                <RecordCard
+                    id={record.id}
+                    label={record.label}
+                    periodicity={record.periodicity}
+                    tags={record.tags}
+                    time={record.latestExecution.startTime}
+                    status={record.latestExecution.status}
+                    startAction={showExecutionModal}
+                    editAction={() => showEditModal(record)}
+                    showAction={() => {
+                        visualizeRecord(record.id);
+                    }}
+                />
             {/each}
         </div>
         <div class="records-view__pagination-container__bar">
-            <PaginationBar perPage={5} currentPage={currentPage} records={dummyRecords} onPageChange={loadRecords}/>
+            <PaginationBar
+                perPage={recordsPerPage}
+                {currentPage}
+                records={filteredWebsiteRecords}
+                onPageChange={loadRecords}
+            />
         </div>
     </div>
 </div>
 
 <style lang="scss">
-    @import '../../../styles/variables.scss';
+    @import "../../../styles/variables.scss";
 
     .records-cta {
         display: flex;
