@@ -79,7 +79,7 @@
         filterTags = filterTags.filter((tag) => tag !== tagName);
     }
 
-    let recordsPerPage = 2;
+    let recordsPerPage = 5;
 
     const sortingOptions = [
         "URL ascending",
