@@ -28,6 +28,9 @@
     let error = null;
     let currentRecord: WebRecord;
 
+    // Execution
+    let chosenRecordForExecution: number = 0;
+
     // Filters
     let filterURL = "";
     let filterLabel = "";
@@ -65,7 +68,8 @@
         editModalVisible = true;
     }
 
-    function showExecutionModal() {
+    function showExecutionModal(websiteRecordId: number) {
+        chosenRecordForExecution = websiteRecordId;
         executionModalVisible = true;
     }
 
@@ -167,6 +171,8 @@
         console.log(filterLabel);
         loadRecords(1);
     }
+
+
 </script>
 
 <AddTagModal bind:showModal={tagModalVisible} action={addTag} />
@@ -175,7 +181,7 @@
     {getWebsiteRecords}
     {currentPage}
 />
-<ExecutionStartedModal bind:showModal={executionModalVisible} />
+<ExecutionStartedModal bind:showModal={executionModalVisible} id={chosenRecordForExecution} />
 {#key currentRecord?.id}
     <EditRecordModal
         bind:showModal={editModalVisible}
@@ -234,7 +240,7 @@
                     tags={record.tags}
                     time={record.latestExecution.startTime}
                     status={record.latestExecution.status}
-                    startAction={showExecutionModal}
+                    startAction={() => showExecutionModal(record.id)}
                     editAction={() => showEditModal(record)}
                     showAction={() => {
                         visualizeRecord(record.id);
