@@ -13,7 +13,7 @@
     }
 </script>
 
-<select class="select-input" value={value} on:change={handleChange}>
+<select class="select-input" bind:value={value} on:change={handleChange}>
     {#each options as option}
         <option value={option}>{option}</option>
     {/each}

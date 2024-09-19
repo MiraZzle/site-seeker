@@ -5,20 +5,78 @@
     import SelectInput from "$components/utils/SelectInput.svelte";
     import Card from "$components/utils/Card.svelte";
     import Toggle from "$components/utils/Toggle.svelte";
-
-    let dummyOptions = ["Option 1", "Option 2", "Option 3"];
+	import NodeGraph from "$components/utils/NodeGraph.svelte";
+    import { type CrawledNode, type GraphNode, type WebsiteRecord } from "$types/visualizationTypes";
+	import Button from "$components/elements/typography/Button.svelte";
+    import AddRecordModal from "$components/utils/AddRecordModal.svelte";
+	import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
+    import { getWebsiteRecordsByNodeId } from "$utils/visualizationUtils.js";
 
     let liveMode: boolean = false;
     let domainMode: boolean = false;
-    let selectedNodeCrawled: boolean = true;
+    let selectedNodeCrawled: boolean = false;
+    let selectedNodeForDetailsCard: boolean = false;
+    let recordSelected: boolean = false;
 
-    let nodeTime = "29/07/24 16:24";
-    let nodeUrl = "https://www.example.com";
-    let recordsCrawled = ["Record 1", "Record 2", "Record 3"]; // Dummy records for the crawled data
+    let nodeTime: string;
+    let nodeUrl: string;
+    let recordsCrawled: string[] = [];
+
+    // Button related variables
+    let addWebsiteRecordModalVisible: boolean = false;
+    let executionStartedModalVisible: boolean = false;
+    let startExecutionId: string = "";
+
+    function handleAddWebsiteRecord() {
+        addWebsiteRecordModalVisible = true;
+    }
+
+    function onStartExecution(websiteRecordId: string) {
+        executionStartedModalVisible = true;
+        startExecutionId = websiteRecordId;
+    }
+
+    function convertToTime(time: string, locale: string = "cs-CZ") {
+        const date = new Date(parseInt(time));
+        return date.toLocaleString(locale);
+    }
+
+    function isSameNode(node1Url: string, node2Url: string): boolean {
+        return node1Url === node2Url;
+    }
+
+    function unselectNode(): void {
+        selectedNodeForDetailsCard = false;
+        selectedNodeCrawled = false;
+        nodeUrl = "";
+        nodeTime = "";
+    }
+
+    async function updateDetailsCard(chosenNode: GraphNode): Promise<void> {
+        const selectedNodeData = chosenNode.value;
+        const isCrawledNode = chosenNode.classes.includes("uncrawled") ? false : true;
+        const selectedNodeUrl = selectedNodeData.url;
+        const selectedNodeCrawlTime = selectedNodeData.crawlTime;
+        if (isSameNode(nodeUrl, selectedNodeUrl)) {
+            unselectNode();
+        } else {
+            selectedNodeForDetailsCard = true;
+            selectedNodeCrawled = isCrawledNode
+            nodeUrl = selectedNodeUrl;
+            nodeTime = convertToTime(selectedNodeCrawlTime);
+            // TAKE CARE OF THE RECORDS
+            const records = await getWebsiteRecordsByNodeId((selectedNodeData as CrawledNode).id);
+            const recordIds = records.map((record: WebsiteRecord) => record.id.toString());
+            recordsCrawled = [...recordIds];
+        }
+    }
 
     export let data;
     const { recordId, recordData } = data;
 </script>
+
+<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} />
+<ExecutionStartedModal bind:showModal={executionStartedModalVisible} id={parseInt(startExecutionId)} />
 
 <Navbar activePage=""/>
 <div class="visualization-i-container">
@@ -27,23 +85,45 @@
     </div>
 </div>
 <div class="visualization-i-graph">
-    <Card>
-        <Header type={2}> Node Details </Header>
-        <div class="record-card-info-item">
-            <span class="record-card-info-label">Crawl Time</span>
-            <span class="record-card-info-value">{nodeTime}</span>
-        </div>
-        <div class="record-card-info-item">
-            <span class="record-card-info-label">URL</span>
-            <a class="record-card-info-value" href={nodeUrl} target="_blank">{nodeUrl}</a>
-        </div>
-        {#if selectedNodeCrawled}
+    <div class="node-details-card">
+        <Card>
+            <Header type={2}> Node Details </Header>
+            {#if selectedNodeForDetailsCard}
+            <div class="record-card-info-item">
+                <span class="record-card-info-label">URL</span>
+                <a class="record-card-info-value" href={nodeUrl} target="_blank">{nodeUrl}</a>
+            </div>
+            {#if selectedNodeCrawled}
+            <div class="record-card-info-item">
+                <span class="record-card-info-label">Crawl Time</span>
+                <span class="record-card-info-value">{nodeTime}</span>
+            </div>
             <div class="record-card-info-item">
                 <span class="record-card-info-label">Records Crawled</span>
-                <SelectInput options={recordsCrawled}/>
+                <SelectInput 
+                    options={recordsCrawled} 
+                    bind:value={startExecutionId}
+                    on:change={
+                        (event) => {
+                            console.log(startExecutionId);
+                            recordSelected = true;
+                        }
+                    }
+                />
+                <div class="record-card-start-execution-button">
+                    <Button type="primary" disabled={!recordSelected} action={() => onStartExecution(startExecutionId)}> Start Execution </Button>
+                </div>
             </div>
-        {/if}
-    </Card>
+            {:else}
+            <div class="record-card-info-item">
+                <div class="record-card-create-website-record-button">
+                    <Button type="primary" action={handleAddWebsiteRecord}> Add Website Record </Button>
+                </div>
+            </div>
+            {/if}
+            {/if}
+        </Card>
+    </div>
     <div class="visualization-i-graph__main">
         <div class="visualization-i-graph__main__toggles">
             <div class="visualization__toggle-container">
@@ -56,8 +136,9 @@
             </div>
         </div>
         <div class="visualization-i-graph__main__graph">
-            <div class="visualization__graph-container">
-            </div>
+                <div class="visualization__graph-container">
+                    <NodeGraph liveMode={liveMode} domainMode={domainMode} fetchedData={recordData} updateNodeDetailsCardCallback={updateDetailsCard} />
+                </div>
         </div>
     </div>
 </div>
@@ -81,7 +162,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 96px 0;
             background-color: $c-gray-bg;
             width: 100%;
         }
@@ -118,7 +198,7 @@
 
                     &__toggles {
                         display: flex;
-                        flex-direction: column;
+                        flex-direction: row;
                         gap: 12px;
                         justify-content: flex-end;
                     }
@@ -141,6 +221,8 @@
                             font-size: 16px;
                             line-height: 140%;
                             font-weight: 600;
+                            max-width: min-content;
+                            overflow-wrap: break-word;
 
                             a {
                                 text-decoration: none;

@@ -6,10 +6,12 @@
     export let actionType: 'link' | 'action' = 'action';
     export let action = () => {};
     export let href: string = '';
+    export let disabled: boolean = false;
     let btnType = `btn_${type}`;
     let btnWidth = `btn-width_${width}`;
 
     function handleClick() {
+        if (disabled) return;
         if (actionType === 'link') {
             window.location.href = href;
         } else {
@@ -18,7 +20,7 @@
     }
 </script>
 
-<button class="btn {btnType} {btnWidth}" on:click={handleClick}>
+<button class="btn {btnType} {btnWidth} {disabled ? 'btn_disabled' : ''}" on:click={handleClick}>
     <slot></slot>
 </button>
 
@@ -34,6 +36,11 @@
         justify-content: center;
         align-items: center;
         font-weight: 500;
+
+        &.btn_disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
 
         &.btn-width_full {
             width: 100%;
