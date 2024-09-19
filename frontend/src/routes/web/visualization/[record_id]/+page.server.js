@@ -7,6 +7,7 @@ export const load = async ({ fetch, params }) => {
 	const graphqlQuery = `
     query GetNodesByRecordId($webPageIds: [ID!]) {
       nodes(webPages: $webPageIds) {
+        id
         title
         url
         crawlTime

@@ -6,10 +6,11 @@
     import Card from "$components/utils/Card.svelte";
     import Toggle from "$components/utils/Toggle.svelte";
 	import NodeGraph from "$components/utils/NodeGraph.svelte";
-    import { type CrawledNode, type GraphNode } from "$types/visualizationTypes";
+    import { type CrawledNode, type GraphNode, type WebsiteRecord } from "$types/visualizationTypes";
 	import Button from "$components/elements/typography/Button.svelte";
     import AddRecordModal from "$components/utils/AddRecordModal.svelte";
 	import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
+    import { getWebsiteRecordsByNodeId } from "$utils/visualizationUtils.js";
 
     let liveMode: boolean = false;
     let domainMode: boolean = false;
@@ -51,7 +52,7 @@
         nodeTime = "";
     }
 
-    function updateDetailsCard(chosenNode: GraphNode): void {
+    async function updateDetailsCard(chosenNode: GraphNode): Promise<void> {
         const selectedNodeData = chosenNode.value;
         const isCrawledNode = chosenNode.classes.includes("uncrawled") ? false : true;
         const selectedNodeUrl = selectedNodeData.url;
@@ -63,10 +64,10 @@
             selectedNodeCrawled = isCrawledNode
             nodeUrl = selectedNodeUrl;
             nodeTime = convertToTime(selectedNodeCrawlTime);
-            // TODO: there should be multiple records????
-            if (isCrawledNode) {
-                recordsCrawled = [(selectedNodeData as CrawledNode).owner.identifier];
-            }
+            // TAKE CARE OF THE RECORDS
+            const records = await getWebsiteRecordsByNodeId((selectedNodeData as CrawledNode).id);
+            const recordIds = records.map((record: WebsiteRecord) => record.id.toString());
+            recordsCrawled = [...recordIds];
         }
     }
 
