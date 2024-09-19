@@ -8,6 +8,7 @@ export type ApiResponseData = {
 
 // API:
 export type CrawledNode = {
+	id: string;
 	title: string;
 	url: string;
 	crawlTime: string;
@@ -27,6 +28,18 @@ export type Owner = {
 	identifier: string;
 	label: string;
 	url: string;
+};
+
+// API: website record from the api
+export type WebsiteRecord = {
+	id: number,
+	url: string,
+	boundaryRegExp: string,
+	periodicity: number,
+	label: string,
+	isActive: boolean,
+	tags: string[],
+	isBeingCrawled: boolean,
 };
 
 /// GRAPH TYPES
