@@ -21,6 +21,7 @@ import {
 } from "graphql";
 import { ruruHTML } from "ruru/server";
 import StartController from "./controllers/startController.mjs";
+import ExecutionsController from "./controllers/executionsController.mjs";
 
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -282,6 +283,121 @@ app.post("/api/websiteRecords/start/:id", (req, res) => {
         message: `Execution of Record ${requestedId} has started!`,
     });
 });
+
+/**
+ * @swagger
+ * /api/executions:
+ *   get:
+ *     description: Get all executions.
+ *     responses:
+ *       200:
+ *         description: Returns all executions.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: The ID of the execution.
+ *                   websiteLabel:
+ *                     type: string
+ *                     description: The label of the website associated with the execution.
+ *                   status:
+ *                     type: string
+ *                     description: The status of the execution (e.g., Finished).
+ *                   startTime:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The start time of the execution.
+ *                   endTime:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The end time of the execution.
+ *                   crawledSites:
+ *                     type: integer
+ *                     description: The number of sites crawled during the execution.
+ *       500:
+ *         description: Internal server error.
+ */
+app.get("/api/executions", async (req, res) => {
+	const executionsController = new ExecutionsController(model);
+	const result = await executionsController.getAllExecutions();
+	if (result) {
+		res.status(200).json(result);
+	} else {
+		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+	}
+})
+
+/**
+ * @swagger
+ * /api/executions/{id}:
+ *   get:
+ *     description: Get executions by website record ID.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the website record to fetch executions for.
+ *     responses:
+ *       200:
+ *         description: Returns executions for the specified website record.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: The ID of the execution.
+ *                   websiteLabel:
+ *                     type: string
+ *                     description: The label of the website associated with the execution.
+ *                   status:
+ *                     type: string
+ *                     description: The status of the execution (e.g., Finished).
+ *                   startTime:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The start time of the execution.
+ *                   endTime:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The end time of the execution.
+ *                   crawledSites:
+ *                     type: integer
+ *                     description: The number of sites crawled during the execution.
+ *       404:
+ *         description: Website record not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message if website record not found.
+ *       500:
+ *         description: Internal server error.
+ */
+app.get("/api/executions/:id", async (req, res) => {
+	const executionsController = new ExecutionsController(model);
+	const requestedId = req.params.id;
+
+	const result = await executionsController.getExecutionsForWebsiteRecord(requestedId);
+	if (result) {
+		res.status(200).json(result);
+	} else {
+		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+	}
+})
 
 
 // GraphQL schema
