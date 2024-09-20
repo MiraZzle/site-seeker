@@ -164,6 +164,44 @@ class Model {
 		}
 	}
 
+	async getWebsiteRecordById(id) {
+		const query = `
+			SELECT * FROM website_records
+			WHERE id = ?
+		`;
+		
+		try {
+			const row = await new Promise((resolve, reject) => {
+				this.db.get(query, [id], (err, row) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(row);
+					}
+				});
+			});
+	
+			if (!row) {
+				throw new Error(`Website record with id ${id} not found`);
+			}
+	
+			return {
+				id: row.id,
+				url: row.url,
+				boundaryRegExp: row.boundaryRegExp,
+				periodicity: row.periodicity,
+				label: row.label,
+				isActive: row.isActive,
+				tags: JSON.parse(row.tags),
+				isBeingCrawled: row.isBeingCrawled,
+			};
+		} catch (err) {
+			console.error(err);
+			return null;
+		}
+	}
+	
+
 	async toggleIsBeingCrawled(id) {
 		try {
 			await new Promise((resolve, reject) => {
