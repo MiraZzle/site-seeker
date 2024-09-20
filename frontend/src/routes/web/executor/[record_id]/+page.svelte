@@ -1,61 +1,58 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import Navbar from "$components/web/Navbar.svelte";
     import Footer from "$components/web/Footer.svelte";
     import Header from "$components/elements/typography/Header.svelte";
     import Card from "$components/utils/Card.svelte";
     import PaginationBar from "$components/elements/PaginationBar.svelte";
-    import TextInput from "$components/utils/TextInput.svelte";
-    import Checkbox from "$components/utils/Checkbox.svelte";
-    import Button from "$components/elements/typography/Button.svelte";
     import ExecutionCard from "$components/elements/ExecutionCard.svelte";
-    import { onMount } from 'svelte';
+    import { fetchExecutionsByRecordId } from "$lib/api/executions";
 
     export let data;
-    const { recordId, executionData } = data;
+    const { recordId, executions } = data;
+
     let currentPage: number = 1;
-
-    const dummyExecutions: any[] = [
-        { label: "Test", status: "Finished", crawledSites: 13, startTime: "29/07/24 16:24", endTime: "29/07/24 16:29" },
-        { label: "Test", status: "Finished", crawledSites: 13, startTime: "29/07/24 16:24", endTime: "29/07/24 16:29" },
-        // Add more dummy executions here...
-    ];
-
+    let executionsPerPage: number = 5;
     let displayedExecutions: any[] = [];
 
-    function loadExecutions(newPage: number) {
-        console.log('Loading executions');
-        currentPage = newPage;
-        let totalExecutions = dummyExecutions.length;
-        let topRange = currentPage * 5 < totalExecutions ? currentPage * 5 : totalExecutions;
-        displayedExecutions = dummyExecutions.slice((currentPage - 1) * 5, topRange);
-        console.log(displayedExecutions);
-        return displayedExecutions;
+    function paginateExecutions() {
+        const totalExecutions = executions.length;
+        const topRange =
+            currentPage * executionsPerPage < totalExecutions
+                ? currentPage * executionsPerPage
+                : totalExecutions;
+        displayedExecutions = executions.slice(
+            (currentPage - 1) * executionsPerPage,
+            topRange,
+        );
     }
 
     onMount(() => {
-        loadExecutions(currentPage);
+        paginateExecutions();
     });
 
-    function handleFilter() {
-        console.log('Filtering executions');
+    function handlePageChange(newPage: number) {
+        currentPage = newPage;
+        paginateExecutions();
     }
+
+    onMount(() => {
+        paginateExecutions();
+    });
 </script>
 
-<Navbar activePage="Executor"/>
+<Navbar activePage="Executor" />
 <div class="execution-info-container">
-    <Header type={2} textAlign="center">Displaying Executions Of Record {recordId}</Header>
+    <Header type={2} textAlign="center"
+        >Displaying Executions of Website Record {recordId}</Header
+    >
 </div>
 <div class="execution-view">
-    <Card>
-        <TextInput placeholder="Your Label" description="Label"/>
-        <Checkbox label="Finished"/>
-        <Button type="dark" on:click={handleFilter}> Filter </Button>
-    </Card>
     <div class="execution-view__pagination-container">
         <div class="execution-view__pagination-container__executions">
             {#each displayedExecutions as execution}
                 <ExecutionCard
-                    label={execution.label}
+                    label={execution.websiteLabel}
                     status={execution.status}
                     crawledSites={execution.crawledSites}
                     startTime={execution.startTime}
@@ -64,13 +61,18 @@
             {/each}
         </div>
         <div class="execution-view__pagination-container__pagination">
-            <PaginationBar currentPage={currentPage} records={dummyExecutions} perPage={5} onPageChange={loadExecutions}/>
+            <PaginationBar
+                {currentPage}
+                records={executions}
+                perPage={executionsPerPage}
+                onPageChange={handlePageChange}
+            />
         </div>
-    </div>  
+    </div>
 </div>
 
 <style lang="scss">
-    @import '../../../../styles/variables.scss';
+    @import "../../../../styles/variables.scss";
 
     .execution-info-container {
         display: flex;

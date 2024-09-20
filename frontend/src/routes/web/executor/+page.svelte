@@ -5,36 +5,57 @@
     import Card from "$components/utils/Card.svelte";
     import PaginationBar from "$components/elements/PaginationBar.svelte";
     import TextInput from "$components/utils/TextInput.svelte";
-    import Checkbox from "$components/utils/Checkbox.svelte";
     import Button from "$components/elements/typography/Button.svelte";
     import ExecutionCard from "$components/elements/ExecutionCard.svelte";
     import { onMount } from 'svelte';
+    import { fetchExecutions } from "$lib/api/executions";
 
     let currentPage: number = 1;
-    const dummyExecutions: any[] = [
-        { label: "Test", status: "Finished", crawledSites: 13, startTime: "29/07/24 16:24", endTime: "29/07/24 16:29" },
-        { label: "Test", status: "Finished", crawledSites: 13, startTime: "29/07/24 16:24", endTime: "29/07/24 16:29" },
-        // Add more dummy executions here...
-    ];
-
+    let executionsPerPage: number = 5;
+    let executions: any[] = [];
+    let filteredExecutions: any[] = [];
     let displayedExecutions: any[] = [];
 
-    function loadExecutions(newPage: number) {
-        console.log('Loading executions');
-        currentPage = newPage;
-        let totalExecutions = dummyExecutions.length;
-        let topRange = currentPage * 5 < totalExecutions ? currentPage * 5 : totalExecutions;
-        displayedExecutions = dummyExecutions.slice((currentPage - 1) * 5, topRange);
-        console.log(displayedExecutions);
-        return displayedExecutions;
+    // Filtry
+    let labelFilter = "";
+
+    // Načítání exekucí z backendu
+    async function loadExecutions() {
+        executions = await fetchExecutions(); // Získáváme všechny exekuce z backendu
+        filterAndPaginateExecutions();
+    }
+
+    $: filterAndPaginateExecutions();
+
+    // Funkce na filtrování a stránkování exekucí
+    function filterAndPaginateExecutions() {
+        // Filtrujeme podle labelu
+        filteredExecutions = executions.filter(execution => {
+            const matchesLabel = labelFilter === "" || execution.websiteLabel.toLowerCase().includes(labelFilter.toLowerCase());
+            return matchesLabel;
+        });
+
+        // Stránkujeme vyfiltrované exekuce
+        const totalExecutions = filteredExecutions.length;
+        const topRange = currentPage * executionsPerPage < totalExecutions ? currentPage * executionsPerPage : totalExecutions;
+        displayedExecutions = filteredExecutions.slice((currentPage - 1) * executionsPerPage, topRange);
+    }
+
+    function handleFilter() {
+        // Reset na první stránku a okamžitá aplikace filtru
+        currentPage = 1;
+        filterAndPaginateExecutions();
     }
 
     onMount(() => {
-        loadExecutions(currentPage);
+        // Načteme všechna data při první montáži komponenty
+        loadExecutions();
     });
 
-    function handleFilter() {
-        console.log('Filtering executions');
+    function handlePageChange(newPage: number) {
+        // Změna stránky pro stránkování
+        currentPage = newPage;
+        filterAndPaginateExecutions();
     }
 </script>
 
@@ -44,26 +65,30 @@
 </div>
 <div class="execution-view">
     <Card>
-        <TextInput placeholder="Your Label" description="Label"/>
-        <Checkbox label="Finished"/>
-        <Button type="dark" on:click={handleFilter}> Filter </Button>
+        <TextInput bind:value={labelFilter} placeholder="Your Label" description="Label"/>
+        <Button type="dark" action={handleFilter}> Filter </Button>
     </Card>
     <div class="execution-view__pagination-container">
         <div class="execution-view__pagination-container__executions">
             {#each displayedExecutions as execution}
                 <ExecutionCard
-                    label={execution.label}
+                    label={execution.websiteLabel}
                     status={execution.status}
                     crawledSites={execution.crawledSites}
                     startTime={execution.startTime}
                     endTime={execution.endTime}
                 />
             {/each}
-        </div>
+        </div>        
         <div class="execution-view__pagination-container__pagination">
-            <PaginationBar currentPage={currentPage} records={dummyExecutions} perPage={5} onPageChange={loadExecutions}/>
+            <PaginationBar
+                currentPage={currentPage}
+                records={filteredExecutions}
+                perPage={executionsPerPage}
+                onPageChange={handlePageChange}
+            />
         </div>
-    </div>  
+    </div>
 </div>
 
 <style lang="scss">
