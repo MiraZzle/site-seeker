@@ -28,6 +28,9 @@
     let error = null;
     let currentRecord: WebRecord;
 
+    // Execution
+    let chosenRecordForExecution: number = 0;
+
     // Filters
     let filterURL = "";
     let filterLabel = "";
@@ -45,6 +48,10 @@
     let tags: any[] = ["Test", "Automation", "Web"];
 
     let deletedRecordId = 0;
+
+    function showCreateRecordModal() {
+        createModalVisible = true;
+    }
 
     function showDeleteModal(id: number) {
         deletedRecordId = id;
@@ -65,7 +72,8 @@
         editModalVisible = true;
     }
 
-    function showExecutionModal() {
+    function showExecutionModal(websiteRecordId: number) {
+        chosenRecordForExecution = websiteRecordId;
         executionModalVisible = true;
     }
 
@@ -170,12 +178,8 @@
 </script>
 
 <AddTagModal bind:showModal={tagModalVisible} action={addTag} />
-<AddRecordModal
-    bind:showModal={createModalVisible}
-    {getWebsiteRecords}
-    {currentPage}
-/>
-<ExecutionStartedModal bind:showModal={executionModalVisible} />
+<AddRecordModal bind:showModal={createModalVisible} getWebsiteRecords={() => getWebsiteRecords(currentPage)} />
+<ExecutionStartedModal bind:showModal={executionModalVisible} id={chosenRecordForExecution} />
 {#key currentRecord?.id}
     <EditRecordModal
         bind:showModal={editModalVisible}
@@ -196,9 +200,7 @@
     <Button
         type="primary"
         actionType="action"
-        action={() => {
-            createModalVisible = true;
-        }}
+        action={() => showCreateRecordModal()}
     >
         Create Website Record
     </Button>
@@ -232,9 +234,9 @@
                     label={record.label}
                     periodicity={record.periodicity}
                     tags={record.tags}
-                    time={record.latestExecution.startTime}
-                    status={record.latestExecution.status}
-                    startAction={showExecutionModal}
+                    time={new Date(record.latestExecution?.startTime).toString()}
+                    status={record.latestExecution?.status}
+                    startAction={() => showExecutionModal(record.id)}
                     editAction={() => showEditModal(record)}
                     showAction={() => {
                         visualizeRecord(record.id);

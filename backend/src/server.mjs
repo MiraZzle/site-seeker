@@ -21,8 +21,6 @@ import {
 } from "graphql";
 import { ruruHTML } from "ruru/server";
 
-import cors from "cors"
-
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

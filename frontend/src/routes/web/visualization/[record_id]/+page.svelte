@@ -18,8 +18,8 @@
     let selectedNodeForDetailsCard: boolean = false;
     let recordSelected: boolean = false;
 
-    let nodeTime: string;
-    let nodeUrl: string;
+    let nodeTime: string = "";
+    let nodeUrl: string ="";
     let recordsCrawled: string[] = [];
 
     // Button related variables
@@ -64,10 +64,11 @@
             selectedNodeCrawled = isCrawledNode
             nodeUrl = selectedNodeUrl;
             nodeTime = convertToTime(selectedNodeCrawlTime);
-            // TAKE CARE OF THE RECORDS
-            const records = await getWebsiteRecordsByNodeId((selectedNodeData as CrawledNode).id);
-            const recordIds = records.map((record: WebsiteRecord) => record.id.toString());
-            recordsCrawled = [...recordIds];
+            if (isCrawledNode) {
+                const records = await getWebsiteRecordsByNodeId((selectedNodeData as CrawledNode).id);
+                const recordIds = records.map((record: WebsiteRecord) => record.id.toString());
+                recordsCrawled = [...recordIds];
+            }
         }
     }
 
@@ -75,7 +76,7 @@
     const { recordId, recordData } = data;
 </script>
 
-<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} />
+<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} url={nodeUrl} />
 <ExecutionStartedModal bind:showModal={executionStartedModalVisible} id={parseInt(startExecutionId)} />
 
 <Navbar activePage=""/>
@@ -105,7 +106,6 @@
                     bind:value={startExecutionId}
                     on:change={
                         (event) => {
-                            console.log(startExecutionId);
                             recordSelected = true;
                         }
                     }

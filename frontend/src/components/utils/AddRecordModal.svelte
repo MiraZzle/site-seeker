@@ -9,13 +9,12 @@
     import TextAreaInput from "./TextAreaInput.svelte";
 
     const timeOptions = ["Seconds", "Minutes", "Hours", "Days"];
-    export let currentPage: number;
-    export let getWebsiteRecords: (currentPage: number) => Promise<void>;
+    export let getWebsiteRecords: () => void = () => (console.log("getWebsiteRecords not provided"));
     export let selectedTime = timeOptions[0];
     export let showModal = false;
+    export let url: string = "" ;
 
     // Form data
-    let url = "";
     let boundaryRegExp = "";
     let periodicity = "";
     let label = "";
@@ -64,7 +63,7 @@
             if (response.ok) {
                 const result = await response.json();
                 console.log("Record added:", result);
-                getWebsiteRecords(currentPage); // Reload records after successful addition
+                getWebsiteRecords(); // Reload records after successful addition
                 showModal = false; // Close modal after success
 
                 // Clear the form fields
