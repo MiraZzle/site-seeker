@@ -3,15 +3,25 @@ import { Worker } from "worker_threads";
 class CrawlerManager {
 	constructor(model) {
 		this.model = model;
+		this.activeExecutions = new Map();
 	}
 
 	scheduleCrawl(websiteRecord) {
+		if (this.activeExecutions.has(websiteRecord.id)) {
+			const { worker, timeout } = this.activeExecutions.get(websiteRecord.id);
+			if (worker) {
+				console.log(`Cancelling previous execution for record ${websiteRecord.id}.`);
+				worker.terminate();
+			}
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		}
 		this.crawlWebsiteRecord(websiteRecord);
 	}
 
 	async crawlWebsiteRecord(websiteRecord) {
 		this.model.toggleIsBeingCrawled(websiteRecord.id);
-		//TODO: Remove the status column from execution
 		let execution = {
 			websiteRecordId: websiteRecord.id,
 			startTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -23,25 +33,33 @@ class CrawlerManager {
 		const worker = new Worker("./src/crawlers/crawler.mjs", {
 			workerData: { websiteRecord, execution },
 		});
-		worker.on("message", (message) => {
+		this.activeExecutions.set(websiteRecord.id, { worker, timeout: null });
+
+		worker.on("message", async (message) => {
 			if (message.crawledData) {
 				execution.crawledCount++;
-				this.model.addCrawledData(message.crawledData);
+				await this.model.addCrawledData(message.crawledData);
 			} else if (message.status === "completed") {
-				this.model.toggleIsBeingCrawled(websiteRecord.id);
+				await this.model.toggleIsBeingCrawled(websiteRecord.id);
 				execution.endTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-				execution.status = "completed"
-				this.model.updateExecution(execution);
+				execution.status = "completed";
+				await this.model.updateExecution(execution);
+
 				if (websiteRecord.isActive) {
-					setTimeout(() => {
+					const timeout = setTimeout(() => {
 						this.crawlWebsiteRecord(websiteRecord);
 					}, websiteRecord.periodicity * 1000);
+
+					this.activeExecutions.set(websiteRecord.id, { worker: null, timeout });
+				} else {
+					this.activeExecutions.delete(websiteRecord.id);
 				}
 				worker.terminate();
 			}
 		});
 		worker.on("error", (error) => {
 			console.error(error);
+			this.activeExecutions.delete(websiteRecord.id);
 			worker.terminate();
 		});
 		worker.on("exit", (code) => {
