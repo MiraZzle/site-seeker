@@ -20,6 +20,7 @@ import {
 	GraphQLBoolean,
 } from "graphql";
 import { ruruHTML } from "ruru/server";
+import StartController from "./controllers/startController.mjs";
 
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -208,7 +209,7 @@ app.post("/api/websiteRecords/add", (req, res) => {
 app.delete("/api/websiteRecords/delete/:id", (req, res) => {
 	const deletionController = new DeletionController(model);
 	const requestedId = req.params.id;
-	deletionController.deleteWebsiteRecord(requestedId);
+	deletionController.deleteWebsiteRecord(Number(requestedId), crawlerManager);
 	res.status(200).json({
 		message: `Deleted website record with id ${requestedId}`,
 	});
@@ -244,6 +245,44 @@ app.put("/api/websiteRecords/update/:id", (req, res) => {
 		message: `Updated website record with id ${requestedId}`,
 	});
 });
+
+/**
+ * @swagger
+ * /api/websiteRecords/start/{id}:
+ *   post:
+ *     description: Start the execution of a website record by ID.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the website record to start execution.
+ *     responses:
+ *       200:
+ *         description: Successfully started the execution of the website record.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the execution has started.
+ *       500:
+ *         description: Internal server error.
+ */
+app.post("/api/websiteRecords/start/:id", (req, res) => {
+    const startController = new StartController(model);
+    const requestedId = req.params.id;
+    
+    startController.startWebsiteRecordExecution(requestedId, crawlerManager);
+    
+    res.status(200).json({
+        message: `Execution of Record ${requestedId} has started!`,
+    });
+});
+
 
 // GraphQL schema
 const WebPageType = new GraphQLObjectType({
