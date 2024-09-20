@@ -520,6 +520,74 @@ class Model {
 		}
 	}
 
+	async getAllExecutions() {
+        const query = `
+            SELECT er.*, wr.label AS websiteLabel
+            FROM execution_records er
+            JOIN website_records wr ON er.websiteRecordId = wr.id
+            ORDER BY er.startTime DESC
+        `;
+
+        try {
+            const rows = await new Promise((resolve, reject) => {
+                this.db.all(query, (err, rows) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(rows);
+                    }
+                });
+            });
+
+            return rows.map(row => ({
+                id: row.id,
+                websiteLabel: row.websiteLabel,
+                status: row.status,
+                startTime: row.startTime,
+                endTime: row.endTime,
+                crawledSites: row.crawledCount
+            }));
+        } catch (err) {
+            console.error("Error fetching executions:", err);
+            return [];
+        }
+    }
+
+	async getExecutionsForWebsiteRecord(websiteRecordId) {
+		const query = `
+			SELECT er.*, wr.label AS websiteLabel
+			FROM execution_records er
+			JOIN website_records wr ON er.websiteRecordId = wr.id
+			WHERE wr.id = ?
+			ORDER BY er.startTime DESC
+		`;
+	
+		try {
+			const rows = await new Promise((resolve, reject) => {
+				this.db.all(query, [websiteRecordId], (err, rows) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
+				});
+			});
+	
+			return rows.map(row => ({
+				id: row.id,
+				websiteLabel: row.websiteLabel,
+				status: row.status,
+				startTime: row.startTime,
+				endTime: row.endTime,
+				crawledSites: row.crawledCount
+			}));
+		} catch (err) {
+			console.error("Error fetching executions for record ID:", err);
+			return [];
+		}
+	}
+	
+
 	async getWebsiteRecordByNodeId(nodeId) {
 		return new Promise((resolve, reject) => {
 			// Step 1: Get the URL associated with the nodeId
