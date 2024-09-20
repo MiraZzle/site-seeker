@@ -209,7 +209,7 @@ app.post("/api/websiteRecords/add", (req, res) => {
 app.delete("/api/websiteRecords/delete/:id", (req, res) => {
 	const deletionController = new DeletionController(model);
 	const requestedId = req.params.id;
-	deletionController.deleteWebsiteRecord(requestedId);
+	deletionController.deleteWebsiteRecord(Number(requestedId), crawlerManager);
 	res.status(200).json({
 		message: `Deleted website record with id ${requestedId}`,
 	});

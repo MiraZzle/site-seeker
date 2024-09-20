@@ -226,21 +226,69 @@ class Model {
 
 	async deleteWebsiteRecord(id) {
 		try {
+			// Begin a transaction to ensure atomicity
+			await new Promise((resolve, reject) => {
+				this.db.run("BEGIN TRANSACTION", (err) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+					resolve();
+				});
+			});
+	
+			// Delete all related crawled_data based on execution records linked to this websiteRecord
+			await new Promise((resolve, reject) => {
+				this.db.run(`
+					DELETE FROM crawled_data 
+					WHERE executionId IN (
+						SELECT id FROM execution_records WHERE websiteRecordId = ?
+					)`, [id], (err) => {
+					if (err) {
+						return this.db.run("ROLLBACK", () => reject(err)); // Rollback on error
+					}
+					resolve();
+				});
+			});
+	
+			// Delete all related execution records
+			await new Promise((resolve, reject) => {
+				this.db.run("DELETE FROM execution_records WHERE websiteRecordId = ?", [id], (err) => {
+					if (err) {
+						return this.db.run("ROLLBACK", () => reject(err)); // Rollback on error
+					}
+					resolve();
+				});
+			});
+	
+			// Delete the website record itself
 			await new Promise((resolve, reject) => {
 				this.db.run("DELETE FROM website_records WHERE id = ?", [id], (err) => {
 					if (err) {
-						reject(err);
-					} else {
-						resolve();
+						return this.db.run("ROLLBACK", () => reject(err)); // Rollback on error
 					}
+					resolve();
 				});
 			});
-			return true;
+	
+			// Commit transaction
+			await new Promise((resolve, reject) => {
+				this.db.run("COMMIT", (err) => {
+					if (err) {
+						return this.db.run("ROLLBACK", () => reject(err)); // Rollback on error
+					}
+					resolve();
+				});
+			});
+	
+			return true; // Success
 		} catch (err) {
-			console.error(err);
-			return false;
+			console.error("Error deleting website record and related data:", err);
+			return false; // Failure
 		}
 	}
+	
+	
 
 	async updateWebsiteRecord(
 		id,
