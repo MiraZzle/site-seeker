@@ -60,7 +60,7 @@
 
     function visualizeRecord(id: number) {
         recordId = id;
-        goto(`/web/visualization/${id}`);
+        goto(`/visualization/${id}`);
     }
 
     function removeRecordFromUI(id: number) {
@@ -298,7 +298,7 @@
 </div>
 
 <style lang="scss">
-    @import "../../../styles/variables.scss";
+    @import "../../styles/variables.scss";
 
     .records-cta {
         display: flex;

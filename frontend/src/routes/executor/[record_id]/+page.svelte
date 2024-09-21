@@ -70,7 +70,7 @@
 </div>
 
 <style lang="scss">
-    @import "../../../../styles/variables.scss";
+    @import "../../../styles/variables.scss";
 
     .execution-info-container {
         display: flex;

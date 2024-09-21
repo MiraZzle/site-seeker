@@ -1,10 +1,8 @@
 <script lang="ts">
     import Navbar from "$components/web/Navbar.svelte";
-    import Footer from "$components/web/Footer.svelte";
     import Header from "$components/elements/typography/Header.svelte";
     import Card from "$components/utils/Card.svelte";
     import PaginationBar from "$components/elements/PaginationBar.svelte";
-    import TextInput from "$components/utils/TextInput.svelte";
     import Button from "$components/elements/typography/Button.svelte";
     import ExecutionCard from "$components/elements/ExecutionCard.svelte";
     import { onMount } from 'svelte';
@@ -47,7 +45,7 @@
     }
 
     function goToExecutions() {
-        goto(`/web/executor/${selectedRecordId}`);
+        goto(`/executor/${selectedRecordId}`);
     }
 
     onMount(() => {
@@ -103,7 +101,7 @@
 </div>
 
 <style lang="scss">
-    @import '../../../styles/variables.scss';
+    @import '../../styles/variables.scss';
 
     .execution-info-container {
         display: flex;
