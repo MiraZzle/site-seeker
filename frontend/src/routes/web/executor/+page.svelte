@@ -14,46 +14,36 @@
     let currentPage: number = 1;
     let executionsPerPage: number = 5;
     let executions: any[] = [];
-    let filteredExecutions: any[] = [];
+    let allExecutions: any[] = [];
     let displayedExecutions: any[] = [];
 
     let selectedRecordId: string = ""; // Store the selected record ID
     let selectedExecutionId: string = ""; // Store the selected execution ID
 
-    let labelFilter = "";
-
     async function loadExecutions() {
         executions = await fetchExecutions();
-        filterAndPaginateExecutions();
+        paginateExecutions();
     }
 
-    $: filterAndPaginateExecutions();
+    $: paginateExecutions();
 
-    function filterAndPaginateExecutions() {
-        filteredExecutions = executions;
+    function paginateExecutions() {
+        allExecutions = executions;
 
-        const totalExecutions = filteredExecutions.length;
+        const totalExecutions = executions.length;
         const topRange = currentPage * executionsPerPage < totalExecutions ? currentPage * executionsPerPage : totalExecutions;
-        displayedExecutions = filteredExecutions.slice((currentPage - 1) * executionsPerPage, topRange);
-    }
-
-    function handleFilter() {
-        currentPage = 1;
-        filterAndPaginateExecutions();
+        displayedExecutions = executions.slice((currentPage - 1) * executionsPerPage, topRange);
     }
 
     function handlePageChange(newPage: number) {
         currentPage = newPage;
-        filterAndPaginateExecutions();
+        paginateExecutions();
     }
 
     // Function to handle card selection
     function handleCardSelect(event: CustomEvent) {
         selectedRecordId = event.detail.recordId;
         selectedExecutionId = event.detail.id;
-
-        console.log("Selected Record ID:", selectedRecordId);
-        console.log("Selected Execution ID:", selectedExecutionId);
     }
 
     function goToExecutions() {
@@ -104,7 +94,7 @@
         <div class="execution-view__pagination-container__pagination">
             <PaginationBar
                 currentPage={currentPage}
-                records={filteredExecutions}
+                records={allExecutions}
                 perPage={executionsPerPage}
                 onPageChange={handlePageChange}
             />
