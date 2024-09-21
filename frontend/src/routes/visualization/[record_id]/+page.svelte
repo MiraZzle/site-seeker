@@ -31,9 +31,35 @@
         addWebsiteRecordModalVisible = true;
     }
 
-    function onStartExecution(websiteRecordId: string) {
+    async function onStartExecution(websiteRecordId: string) {
         executionStartedModalVisible = true;
         startExecutionId = websiteRecordId;
+
+        try {
+            // Send POST request to backend
+            const response = await fetch(
+                `http://localhost:3000/api/websiteRecords/start/${websiteRecordId}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            // Check if the request was successful
+            if (!response.ok) {
+                throw new Error("Failed to start execution");
+            }
+
+            // Handle success (e.g., show a notification or log)
+            console.log(
+                `Execution of Record ${websiteRecordId} started successfully!`,
+            );
+        } catch (error) {
+            // Handle error (e.g., show an error message or log)
+            console.error("Error starting execution:", error);
+        }
     }
 
     function convertToTime(time: string, locale: string = "cs-CZ") {
