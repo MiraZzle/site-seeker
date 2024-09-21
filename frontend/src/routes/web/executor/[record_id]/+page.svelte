@@ -1,12 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import Navbar from "$components/web/Navbar.svelte";
-    import Footer from "$components/web/Footer.svelte";
     import Header from "$components/elements/typography/Header.svelte";
-    import Card from "$components/utils/Card.svelte";
     import PaginationBar from "$components/elements/PaginationBar.svelte";
     import ExecutionCard from "$components/elements/ExecutionCard.svelte";
-    import { fetchExecutionsByRecordId } from "$lib/api/executions";
 
     export let data;
     const { recordId, executions } = data;
@@ -57,6 +54,7 @@
                     crawledSites={execution.crawledSites}
                     startTime={execution.startTime}
                     endTime={execution.endTime}
+                    websiteRecordId={execution.websiteRecordId}
                 />
             {/each}
         </div>

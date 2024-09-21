@@ -4,9 +4,32 @@
     export let crawledSites = 13;
     export let startTime = "29/07/24 16:24";
     export let endTime = "29/07/24 16:29";
+    export let websiteRecordId = "1";
+    export let selected: boolean = false;
+    export let executionId = "1";
+
+    // Emit an event when the card is clicked
+    const selectExecution = () => {
+        const detail = { recordId: websiteRecordId, id: executionId };
+        dispatch('select', detail);
+    };
+
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
 </script>
 
-<div class="execution-card shadow">
+<!-- Add the selected class conditionally -->
+<div class="execution-card shadow {selected ? 'execution-card__selected' : ''}"
+    on:click={selectExecution}
+    on:keydown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            selectExecution();
+        }
+    }}
+    tabindex="0"
+    role="button"
+    aria-pressed={selected}
+>
     <div class="execution-info">
         <div class="execution-info-item">
             <span class="execution-info-label">Label</span>
@@ -28,6 +51,10 @@
             <span class="execution-info-label">End Time</span>
             <span class="execution-info-value"> {endTime} </span>
         </div>
+        <div class="execution-info-item">
+            <span class="execution-info-label">Parent Record ID</span>
+            <span class="execution-info-value"> {websiteRecordId} </span>
+        </div>
     </div>
 </div>
 
@@ -42,6 +69,12 @@
         padding: 16px;
         width: auto;
         transition: all .1s ease-out;
+        cursor: pointer;
+
+        &__selected {
+            border: 1px solid black;
+            background-color: darken(white, 2%);
+        }
 
         &:hover {
             transform: scale(1.04);
