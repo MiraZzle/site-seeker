@@ -1,12 +1,20 @@
 <script lang="ts">
     import Navbar from "$components/web/Navbar.svelte";
-    import Footer from "$components/web/Footer.svelte";
     import FeatureCard from "$components/elements/FeatureCard.svelte";
     import Button from "$components/elements/typography/Button.svelte";
     import Header from "$components/elements/typography/Header.svelte";
     import Paragraph from "$components/elements/typography/Paragraph.svelte";
     import Explore from "$components/utils/icons/Explore.svelte";
     import Eye from "$components/utils/icons/Eye.svelte";
+    import { goto } from "$app/navigation";
+
+    function goToExecutions() {
+        goto(`/executor`);
+    }
+
+    function goToRecords() {
+        goto(`/records`);
+    }
 </script>
 
 <Navbar />
@@ -19,8 +27,8 @@
         </Paragraph>
     </div>
     <div class="hero-buttons">
-        <Button type="primary"><Explore /> Explore </Button>
-        <Button type="secondary"><Eye />  Visualize </Button>
+        <Button type="primary" action={goToRecords}><Explore /> Explore </Button>
+        <Button type="secondary" action={goToExecutions}><Eye />  Visualize </Button>
     </div>
 </div>
 <div class="features">
