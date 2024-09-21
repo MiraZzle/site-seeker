@@ -21,9 +21,11 @@
     export let label = record?.label;
     let tags = record?.tags ? record.tags.join(", ") : ""; // Safe fallback to an empty string
     export let isActive = record?.isActive;
+    export let onDeleteSuccess: (id: number) => void;
 
     let selectedTime = timeOptions[0]; // Default to "Seconds"
-    let displayedPeriodicity: string = convertPeriodicity(periodicity).toString();
+    let displayedPeriodicity: string =
+        convertPeriodicity(periodicity).toString();
 
     // Error messages
     let urlError = "";
@@ -64,9 +66,11 @@
         tagsError = "";
 
         // Validace URL
-        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+        const urlPattern =
+            /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
         if (!startingUrl || !urlPattern.test(startingUrl)) {
-            urlError = "Invalid URL format. Make sure it starts with http:// or https://";
+            urlError =
+                "Invalid URL format. Make sure it starts with http:// or https://";
         }
 
         // Validace Boundary RegExp
@@ -77,7 +81,11 @@
         }
 
         // Validace periodicity (musí být číslo a větší než 0)
-        if (!displayedPeriodicity || isNaN(Number(displayedPeriodicity)) || Number(displayedPeriodicity) <= 0) {
+        if (
+            !displayedPeriodicity ||
+            isNaN(Number(displayedPeriodicity)) ||
+            Number(displayedPeriodicity) <= 0
+        ) {
             periodicityError = "Periodicity must be a number greater than 0.";
         }
 
@@ -87,12 +95,19 @@
         }
 
         // Validace tags (žádné speciální znaky)
-        if (!tags || tags.split(",").some(tag => /[^a-zA-Z0-9 ]/.test(tag))) {
-            tagsError = "Tags can only contain alphanumeric characters and spaces.";
+        if (!tags || tags.split(",").some((tag) => /[^a-zA-Z0-9 ]/.test(tag))) {
+            tagsError =
+                "Tags can only contain alphanumeric characters and spaces.";
         }
 
         // Pokud jsou nějaké chyby, zastav proces a nezobrazuj modal
-        if (urlError || boundaryRegExpError || periodicityError || labelError || tagsError) {
+        if (
+            urlError ||
+            boundaryRegExpError ||
+            periodicityError ||
+            labelError ||
+            tagsError
+        ) {
             return;
         }
 
@@ -162,7 +177,10 @@
                     `Record with ID ${record.id} deleted successfully.`,
                 );
                 showDeleteModal(record.id); // Show confirmation modal
-                getWebsiteRecords(currentPage); // Reload records
+
+                // Zavolání callbacku v případě úspěšného smazání
+                onDeleteSuccess(record.id);
+
                 showModal = false; // Close this modal
             } else {
                 console.error("Failed to delete record:", response.status);

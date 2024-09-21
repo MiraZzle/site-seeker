@@ -63,6 +63,16 @@
         goto(`/web/visualization/${id}`);
     }
 
+    function removeRecordFromUI(id: number) {
+        websiteRecords = websiteRecords.filter((record) => record.id !== id);
+        filteredWebsiteRecords = filteredWebsiteRecords.filter(
+            (record) => record.id !== id,
+        );
+        displayedRecords = displayedRecords.filter(
+            (record) => record.id !== id,
+        );
+    }
+
     function showTagModal() {
         tagModalVisible = true;
     }
@@ -204,21 +214,25 @@
 </script>
 
 <AddTagModal bind:showModal={tagModalVisible} action={addTag} />
-<AddRecordModal bind:showModal={createModalVisible} getWebsiteRecords={() => getWebsiteRecords(currentPage)} />
-<ExecutionStartedModal bind:showModal={executionModalVisible} id={chosenRecordForExecution} />
+<AddRecordModal
+    bind:showModal={createModalVisible}
+    getWebsiteRecords={() => getWebsiteRecords(currentPage)}
+/>
+<ExecutionStartedModal
+    bind:showModal={executionModalVisible}
+    id={chosenRecordForExecution}
+/>
 {#key currentRecord?.id}
     <EditRecordModal
         bind:showModal={editModalVisible}
         record={currentRecord}
         {getWebsiteRecords}
         {currentPage}
-        showDeleteModal={showDeleteModal}
+        {showDeleteModal}
+        onDeleteSuccess={removeRecordFromUI}
     />
 {/key}
-<DeleteRecordModal
-    bind:showModal={deleteModalVisible}
-    id={deletedRecordId}
-/>
+<DeleteRecordModal bind:showModal={deleteModalVisible} id={deletedRecordId} />
 
 <Navbar activePage="Records" />
 <div class="records-cta">
@@ -260,7 +274,9 @@
                     label={record.label}
                     periodicity={record.periodicity}
                     tags={record.tags}
-                    time={new Date(record.latestExecution?.startTime).toString()}
+                    time={new Date(
+                        record.latestExecution?.startTime,
+                    ).toString()}
                     status={record.latestExecution?.status}
                     startAction={() => showExecutionModal(record.id)}
                     editAction={() => showEditModal(record)}
