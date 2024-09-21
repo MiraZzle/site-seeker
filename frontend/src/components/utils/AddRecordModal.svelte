@@ -9,10 +9,10 @@
     import TextAreaInput from "./TextAreaInput.svelte";
 
     const timeOptions = ["Seconds", "Minutes", "Hours", "Days"];
-    export let getWebsiteRecords: () => void = () => (console.log("getWebsiteRecords not provided"));
+    export let getWebsiteRecords: () => void = () => console.log("getWebsiteRecords not provided");
     export let selectedTime = timeOptions[0];
     export let showModal = false;
-    export let url: string = "" ;
+    export let url: string = "";
 
     // Form data
     let boundaryRegExp = "";
@@ -21,30 +21,77 @@
     let tags = "";
     let isActive = false;
 
-    // Submit function
-    async function addRecord() {
-        // Convert periodicity to seconds based on the selected time unit
-        let periodicityInSeconds = parseFloat(periodicity); // Parse the input to a number
+    // Error messages
+    let urlError = "";
+    let boundaryRegExpError = "";
+    let periodicityError = "";
+    let labelError = "";
+    let tagsError = "";
 
+    // Submit function with validation
+    async function addRecord() {
+        // Reset error messages
+        urlError = "";
+        boundaryRegExpError = "";
+        periodicityError = "";
+        labelError = "";
+        tagsError = "";
+
+        // Validace URL
+        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+        if (!url || !urlPattern.test(url)) {
+            urlError = "Invalid URL format. Make sure it starts with http:// or https://";
+        }
+
+        // Validace Boundary RegExp
+        try {
+            new RegExp(boundaryRegExp);
+        } catch (e) {
+            boundaryRegExpError = "Invalid Regular Expression format.";
+        }
+
+        // Validace periodicity (musí být číslo a větší než 0)
+        if (!periodicity || isNaN(Number(periodicity)) || Number(periodicity) <= 0) {
+            periodicityError = "Periodicity must be a number greater than 0.";
+        }
+
+        // Validace label (nesmí být prázdný)
+        if (!label) {
+            labelError = "Label cannot be empty.";
+        }
+
+        // Validace tags (žádné speciální znaky)
+        if (!tags || tags.split(",").some(tag => /[^a-zA-Z0-9 ]/.test(tag))) {
+            tagsError = "Tags can only contain alphanumeric characters and spaces.";
+        }
+
+        // Pokud jsou nějaké chyby, zastav proces a nezobrazuj modal
+        if (urlError || boundaryRegExpError || periodicityError || labelError || tagsError) {
+            return;
+        }
+
+        // Pokud nejsou chyby, pokračujeme s odesláním dat
+        let periodicityInSeconds = parseFloat(periodicity);
+
+        // Převod periodicity na sekundy
         switch (selectedTime) {
             case "Minutes":
                 periodicityInSeconds *= 60;
                 break;
             case "Hours":
-                periodicityInSeconds *= 3600; // 60 * 60
+                periodicityInSeconds *= 3600;
                 break;
             case "Days":
-                periodicityInSeconds *= 86400; // 60 * 60 * 24
+                periodicityInSeconds *= 86400;
                 break;
-            // No need to multiply for seconds since it's the base unit
         }
 
         const newRecord = {
             url,
             boundaryRegExp,
-            periodicity: periodicityInSeconds, // Use the calculated periodicity in seconds
+            periodicity: periodicityInSeconds,
             label,
-            tags: tags.split(",").map((tag) => tag.trim()), // Split tags by comma and trim
+            tags: tags.split(",").map(tag => tag.trim()),
             isActive,
         };
 
@@ -90,23 +137,29 @@
     closeOnOutsideClick={true}
 >
     <div class="modal-desc">
-        <Header type={2} color="black" textAlign="center"
-            >Add New Site Record</Header
-        >
-        <Paragraph type={3} color="grayLight" textAlign="center"
-            >Define Settings for Crawling</Paragraph
-        >
+        <Header type={2} color="black" textAlign="center">
+            Add New Site Record
+        </Header>
+        <Paragraph type={3} color="grayLight" textAlign="center">
+            Define Settings for Crawling
+        </Paragraph>
     </div>
     <TextInput
         bind:value={url}
         description="Starting URL"
         placeholder="https://www.example.com/"
     />
+    {#if urlError}
+        <span class="error-message">{urlError}</span>
+    {/if}
     <TextInput
         bind:value={boundaryRegExp}
         description="Boundary RegExp"
         placeholder="^https://www.example.com"
     />
+    {#if boundaryRegExpError}
+        <span class="error-message">{boundaryRegExpError}</span>
+    {/if}
     <div class="periodicity-container">
         <TextInput
             bind:value={periodicity}
@@ -115,17 +168,26 @@
         />
         <SelectInput options={timeOptions} bind:value={selectedTime} />
     </div>
+    {#if periodicityError}
+        <span class="error-message">{periodicityError}</span>
+    {/if}
     <TextInput
         bind:value={label}
         description="Label"
         placeholder="Enter a descriptive label"
     />
+    {#if labelError}
+        <span class="error-message">{labelError}</span>
+    {/if}
     <TextAreaInput
         bind:value={tags}
         id="tags"
         label="Tags"
         placeholder="Enter tags separated by commas"
     />
+    {#if tagsError}
+        <span class="error-message">{tagsError}</span>
+    {/if}
     <div class="active-container">
         <span class="active-container__label">Active</span>
         <Toggle bind:checked={isActive} />
@@ -164,5 +226,10 @@
         &__label {
             color: $c-black;
         }
+    }
+
+    .error-message {
+        color: red;
+        font-size: 10px;
     }
 </style>

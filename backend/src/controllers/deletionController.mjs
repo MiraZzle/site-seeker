@@ -4,7 +4,6 @@ class DeletionController {
     }
 
     async deleteWebsiteRecord(id, crawlerManager) {
-		console.log(`MA AKTIVNI EXECUTION? - ${crawlerManager.isExecutionActive(id)}`)
         if (crawlerManager.isExecutionActive(id)) {
             crawlerManager.cancelExecution(id);
         }
