@@ -100,6 +100,8 @@
     }
 
     .modal {
+        max-height: 90%;
+        overflow-y: scroll;
         display: flex;
         margin: auto;
         flex-direction: column;
