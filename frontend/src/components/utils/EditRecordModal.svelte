@@ -25,6 +25,13 @@
     let selectedTime = timeOptions[0]; // Default to "Seconds"
     let displayedPeriodicity: string = convertPeriodicity(periodicity).toString();
 
+    // Error messages
+    let urlError = "";
+    let boundaryRegExpError = "";
+    let periodicityError = "";
+    let labelError = "";
+    let tagsError = "";
+
     // Function to convert seconds to the appropriate time unit
     function convertPeriodicity(seconds: number) {
         if (seconds < 60) {
@@ -47,8 +54,48 @@
         displayedPeriodicity = convertPeriodicity(periodicity).toString();
     }
 
-    // Function to handle form submission
+    // Function to handle form submission with validation
     async function handleUpdate() {
+        // Reset error messages
+        urlError = "";
+        boundaryRegExpError = "";
+        periodicityError = "";
+        labelError = "";
+        tagsError = "";
+
+        // Validace URL
+        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+        if (!startingUrl || !urlPattern.test(startingUrl)) {
+            urlError = "Invalid URL format. Make sure it starts with http:// or https://";
+        }
+
+        // Validace Boundary RegExp
+        try {
+            new RegExp(boundaryRegExp);
+        } catch (e) {
+            boundaryRegExpError = "Invalid Regular Expression format.";
+        }
+
+        // Validace periodicity (musí být číslo a větší než 0)
+        if (!displayedPeriodicity || isNaN(Number(displayedPeriodicity)) || Number(displayedPeriodicity) <= 0) {
+            periodicityError = "Periodicity must be a number greater than 0.";
+        }
+
+        // Validace label (nesmí být prázdný)
+        if (!label) {
+            labelError = "Label cannot be empty.";
+        }
+
+        // Validace tags (žádné speciální znaky)
+        if (!tags || tags.split(",").some(tag => /[^a-zA-Z0-9 ]/.test(tag))) {
+            tagsError = "Tags can only contain alphanumeric characters and spaces.";
+        }
+
+        // Pokud jsou nějaké chyby, zastav proces a nezobrazuj modal
+        if (urlError || boundaryRegExpError || periodicityError || labelError || tagsError) {
+            return;
+        }
+
         let periodicityInSeconds = parseFloat(displayedPeriodicity);
 
         // Convert back to seconds before sending
@@ -133,12 +180,20 @@
     closeOnOutsideClick={true}
 >
     <div class="modal-desc">
-        <Header type={2} color="black" textAlign="center"
-            >Edit Existing Record</Header
-        >
+        <Header type={2} color="black" textAlign="center">
+            Edit Existing Record
+        </Header>
     </div>
     <TextInput description="Starting URL" bind:value={startingUrl} />
+    {#if urlError}
+        <span class="error-message">{urlError}</span>
+    {/if}
+
     <TextInput description="Boundary RegExp" bind:value={boundaryRegExp} />
+    {#if boundaryRegExpError}
+        <span class="error-message">{boundaryRegExpError}</span>
+    {/if}
+
     <div class="periodicity-container">
         <TextInput
             description="Periodicity"
@@ -146,17 +201,29 @@
         />
         <SelectInput options={timeOptions} bind:value={selectedTime} />
     </div>
+    {#if periodicityError}
+        <span class="error-message">{periodicityError}</span>
+    {/if}
+
     <TextInput
         description="Label"
         bind:value={label}
         placeholder="Enter a descriptive label"
     />
+    {#if labelError}
+        <span class="error-message">{labelError}</span>
+    {/if}
+
     <TextAreaInput
         id="tags"
         label="Tags"
         bind:value={tags}
         placeholder="Enter tags separated by commas"
     />
+    {#if tagsError}
+        <span class="error-message">{tagsError}</span>
+    {/if}
+
     <div class="active-container">
         <span class="active-container__label">Active</span>
         <Toggle bind:checked={isActive} />
@@ -198,6 +265,11 @@
         &__label {
             color: $c-black;
         }
+    }
+
+    .error-message {
+        color: red;
+        font-size: 10px;
     }
 
     .action-buttons {
