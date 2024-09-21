@@ -187,12 +187,17 @@ app.get("/api/websiteRecords/:id", async (req, res) => {
  *       200:
  *         description: Successfully added the website record.
  */
-app.post("/api/websiteRecords/add", (req, res) => {
-	const additionController = new AdditionController(model);
-	const websiteRecordTemp = req.body;
-	const websiteRecord = DataFormatter.getRecordFromJson(websiteRecordTemp);
-	additionController.addWebsiteRecord(websiteRecord, crawlerManager);
-	res.status(200).json({ message: "Website record added" });
+app.post("/api/websiteRecords/add", async (req, res) => {
+    const additionController = new AdditionController(model);
+    const websiteRecordTemp = req.body;
+    const websiteRecord = DataFormatter.getRecordFromJson(websiteRecordTemp);
+
+    try {
+        await additionController.addWebsiteRecord(websiteRecord, crawlerManager);
+        res.status(200).json({ message: "Website record added" });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 });
 
 /**
@@ -240,14 +245,17 @@ app.delete("/api/websiteRecords/delete/:id", (req, res) => {
  *       200:
  *         description: Successfully updated the website record.
  */
-app.put("/api/websiteRecords/update/:id", (req, res) => {
-	const updateController = new UpdateController(model);
-	const requestedId = req.params.id;
-	const updatedRecord = req.body;
-	updateController.updateWebsiteRecord(requestedId, updatedRecord);
-	res.status(200).json({
-		message: `Updated website record with id ${requestedId}`,
-	});
+app.put("/api/websiteRecords/update/:id", async (req, res) => {
+    const updateController = new UpdateController(model);
+    const requestedId = req.params.id;
+    const updatedRecord = req.body;
+
+    try {
+        await updateController.updateWebsiteRecord(requestedId, updatedRecord);
+        res.status(200).json({ message: `Updated website record with id ${requestedId}` });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 });
 
 /**
