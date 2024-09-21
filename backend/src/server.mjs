@@ -22,6 +22,7 @@ import {
 import { ruruHTML } from "ruru/server";
 import StartController from "./controllers/startController.mjs";
 import ExecutionsController from "./controllers/executionsController.mjs";
+import GetController from "./controllers/getController.mjs";
 
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -152,7 +153,8 @@ app.get("/", (req, res) => {
  *         description: Internal server error.
  */
 app.get("/api/websiteRecords/", async (req, res) => {
-	const result = await model.getAllWebsiteRecords();
+	const getController = new GetController(model);
+	const result = await getController.getAllWebsiteRecords();
 	if (result) {
 		res.status(200).json(result);
 	} else {
@@ -161,7 +163,8 @@ app.get("/api/websiteRecords/", async (req, res) => {
 });
 
 app.get("/api/websiteRecords/:id", async (req, res) => {
-	const result = await model.getWebsiteRecordByNodeId(req.params.id);
+	const getController = new GetController(model);
+	const result = await getController.getWebsiteRecordById(req.params.id);
 	if (result) {
 		res.status(200).json(result);
 	} else {
