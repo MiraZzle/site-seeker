@@ -23,7 +23,7 @@
         </div>
         <div class="record-card-info-item">
             <span class="record-card-info-label">Periodicity</span>
-            <span class="record-card-info-value"> {periodicity} </span>
+            <span class="record-card-info-value"> {periodicity}s </span>
         </div>
         <div class="record-card-info-item">
             <span class="record-card-info-label">Last Exec Status</span>

@@ -10,9 +10,9 @@
         <Logo />
         <div class="nav-container-links">
             <div class="page-nav">
-                <a class="nav-link {activePage === 'Home' ? 'active' : ''}" href="/web/home">Home</a>
-                <a class="nav-link {activePage === 'Records' ? 'active' : ''}" href="/web/records">Records</a>
-                <a class="nav-link {activePage === 'Executor' ? 'active' : ''}" href="/web/executor">Executor</a>
+                <a class="nav-link {activePage === 'Home' ? 'active' : ''}" href="/">Home</a>
+                <a class="nav-link {activePage === 'Records' ? 'active' : ''}" href="/records">Records</a>
+                <a class="nav-link {activePage === 'Executor' ? 'active' : ''}" href="/executor">Executor</a>
                 <a class="nav-link {activePage === 'Api' ? 'active' : ''}" href="/api">API</a>
             </div>
             <GithubButton/>

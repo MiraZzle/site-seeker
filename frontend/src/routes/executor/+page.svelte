@@ -1,72 +1,77 @@
 <script lang="ts">
     import Navbar from "$components/web/Navbar.svelte";
-    import Footer from "$components/web/Footer.svelte";
     import Header from "$components/elements/typography/Header.svelte";
     import Card from "$components/utils/Card.svelte";
     import PaginationBar from "$components/elements/PaginationBar.svelte";
-    import TextInput from "$components/utils/TextInput.svelte";
     import Button from "$components/elements/typography/Button.svelte";
     import ExecutionCard from "$components/elements/ExecutionCard.svelte";
     import { onMount } from 'svelte';
     import { fetchExecutions } from "$lib/api/executions";
+    import { goto } from "$app/navigation";
 
     let currentPage: number = 1;
     let executionsPerPage: number = 5;
     let executions: any[] = [];
-    let filteredExecutions: any[] = [];
+    let allExecutions: any[] = [];
     let displayedExecutions: any[] = [];
 
-    // Filtry
-    let labelFilter = "";
+    let selectedRecordId: string = ""; // Store the selected record ID
+    let selectedExecutionId: string = ""; // Store the selected execution ID
 
-    // Načítání exekucí z backendu
     async function loadExecutions() {
-        executions = await fetchExecutions(); // Získáváme všechny exekuce z backendu
-        filterAndPaginateExecutions();
+        executions = await fetchExecutions();
+        paginateExecutions();
     }
 
-    $: filterAndPaginateExecutions();
+    $: paginateExecutions();
 
-    // Funkce na filtrování a stránkování exekucí
-    function filterAndPaginateExecutions() {
-        // Filtrujeme podle labelu
-        filteredExecutions = executions.filter(execution => {
-            const matchesLabel = labelFilter === "" || execution.websiteLabel.toLowerCase().includes(labelFilter.toLowerCase());
-            return matchesLabel;
-        });
+    function paginateExecutions() {
+        allExecutions = executions;
 
-        // Stránkujeme vyfiltrované exekuce
-        const totalExecutions = filteredExecutions.length;
+        const totalExecutions = executions.length;
         const topRange = currentPage * executionsPerPage < totalExecutions ? currentPage * executionsPerPage : totalExecutions;
-        displayedExecutions = filteredExecutions.slice((currentPage - 1) * executionsPerPage, topRange);
+        displayedExecutions = executions.slice((currentPage - 1) * executionsPerPage, topRange);
     }
 
-    function handleFilter() {
-        // Reset na první stránku a okamžitá aplikace filtru
-        currentPage = 1;
-        filterAndPaginateExecutions();
+    function handlePageChange(newPage: number) {
+        currentPage = newPage;
+        paginateExecutions();
+    }
+
+    // Function to handle card selection
+    function handleCardSelect(event: CustomEvent) {
+        selectedRecordId = event.detail.recordId;
+        selectedExecutionId = event.detail.id;
+    }
+
+    function goToExecutions() {
+        goto(`/executor/${selectedRecordId}`);
     }
 
     onMount(() => {
-        // Načteme všechna data při první montáži komponenty
         loadExecutions();
     });
-
-    function handlePageChange(newPage: number) {
-        // Změna stránky pro stránkování
-        currentPage = newPage;
-        filterAndPaginateExecutions();
-    }
 </script>
 
 <Navbar activePage="Executor"/>
 <div class="execution-info-container">
-    <Header type={2} textAlign="center">Displaying all Executions</Header>
+    <Header type={3} textAlign="center">Displaying all Executions</Header>
 </div>
 <div class="execution-view">
     <Card>
-        <TextInput bind:value={labelFilter} placeholder="Your Label" description="Label"/>
-        <Button type="dark" action={handleFilter}> Filter </Button>
+        <Header type={2}>Execution Detail</Header>
+        <!-- Insert the selected record and execution IDs after the header -->
+        {#if selectedRecordId && selectedExecutionId}
+            <div class="execution-card-info-item">
+                <span class="execution-card-info-label">Record ID</span>
+                <span class="execution-card-info-value">{selectedRecordId}</span>
+            </div>
+            <div class="execution-card-info-item">
+                <span class="execution-card-info-label">Execution ID</span>
+                <span class="execution-card-info-value">{selectedExecutionId}</span>
+            </div>
+            <Button type="dark" action={goToExecutions}> Show Record Executions </Button>
+        {/if}
     </Card>
     <div class="execution-view__pagination-container">
         <div class="execution-view__pagination-container__executions">
@@ -77,13 +82,17 @@
                     crawledSites={execution.crawledSites}
                     startTime={execution.startTime}
                     endTime={execution.endTime}
+                    websiteRecordId={execution.websiteRecordId}
+                    executionId={execution.id}
+                    selected={selectedExecutionId === execution.id}
+                    on:select={handleCardSelect}
                 />
             {/each}
-        </div>        
+        </div>
         <div class="execution-view__pagination-container__pagination">
             <PaginationBar
                 currentPage={currentPage}
-                records={filteredExecutions}
+                records={allExecutions}
                 perPage={executionsPerPage}
                 onPageChange={handlePageChange}
             />
@@ -92,7 +101,7 @@
 </div>
 
 <style lang="scss">
-    @import '../../../styles/variables.scss';
+    @import '../../styles/variables.scss';
 
     .execution-info-container {
         display: flex;
@@ -128,6 +137,29 @@
                 display: flex;
                 justify-content: center;
             }
+        }
+    }
+
+    /* Execution card info style */
+    .execution-card-info-item {
+        display: flex;
+        gap: 2px;
+        flex-direction: column;
+        margin: 4px 8px;
+
+        .execution-card-info-label {
+            font-size: 14px;
+            line-height: 140%;
+            font-weight: 400;
+            color: $c-gray-light;
+        }
+
+        .execution-card-info-value {
+            font-size: 16px;
+            line-height: 140%;
+            font-weight: 600;
+            max-width: min-content;
+            overflow-wrap: break-word;
         }
     }
 </style>

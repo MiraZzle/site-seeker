@@ -67,6 +67,10 @@
             background: none;
             border: 1px solid $c-gray-dark;
             color: $c-gray-dark;
+
+            &:hover {
+                background-color: #dfdfdf;
+            }
         }
         &_dark {
             background-color: $c-gray-dark;
