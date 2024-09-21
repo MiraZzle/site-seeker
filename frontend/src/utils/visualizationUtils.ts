@@ -205,7 +205,7 @@ export async function getWebsiteRecordsByNodeId(
 ): Promise<WebsiteRecord[]> {
 	try {
 		const response = await axios.get(
-			`http://localhost:3000/api/websiteRecords/${nodeId}`
+			`http://localhost:3000/api/websiteRecords/nodes/${nodeId}`
 		);
 		return response.data;
 	} catch (error) {

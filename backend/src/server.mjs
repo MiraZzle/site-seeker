@@ -163,9 +163,42 @@ app.get("/api/websiteRecords/", async (req, res) => {
 	}
 });
 
-app.get("/api/websiteRecords/:id", async (req, res) => {
+
+/**
+ * @swagger
+ * /api/websiteRecords/nodes/{id}:
+ *   get:
+ *     description: Get a website record by node ID.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the node to fetch the website record for.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the website record.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/WebsiteRecord'
+ *       404:
+ *         description: Website record not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message if website record not found.
+ *       500:
+ *         description: Internal server error.
+ */
+app.get("/api/websiteRecords/nodes/:id", async (req, res) => {
 	const getController = new GetController(model);
-	const result = await getController.getWebsiteRecordById(req.params.id);
+	const result = await getController.getWebsiteRecordByNodeId(req.params.id);
 	if (result) {
 		res.status(200).json(result);
 	} else {
@@ -194,8 +227,12 @@ app.post("/api/websiteRecords/add", async (req, res) => {
     const websiteRecord = DataFormatter.getRecordFromJson(websiteRecordTemp);
 
     try {
-        await additionController.addWebsiteRecord(websiteRecord, crawlerManager);
-        res.status(200).json({ message: "Website record added" });
+        const addedWebsiteRecordId = await additionController.addWebsiteRecord(websiteRecord, crawlerManager);
+		res.status(200).json(
+			{
+				message: `Website record added with id ${addedWebsiteRecordId}`,
+				lastId: addedWebsiteRecordId,
+			});
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
