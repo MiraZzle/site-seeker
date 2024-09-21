@@ -71,8 +71,19 @@
 </div>
 <div class="execution-view">
     <Card>
-        <Header type={2}>Selected Record {selectedRecordId} {selectedExecutionId}</Header>
-        <Button type="dark" action={goToExecutions}> Show executions </Button>
+        <Header type={2}>Execution Detail</Header>
+        <!-- Insert the selected record and execution IDs after the header -->
+        {#if selectedRecordId && selectedExecutionId}
+            <div class="execution-card-info-item">
+                <span class="execution-card-info-label">Record ID</span>
+                <span class="execution-card-info-value">{selectedRecordId}</span>
+            </div>
+            <div class="execution-card-info-item">
+                <span class="execution-card-info-label">Execution ID</span>
+                <span class="execution-card-info-value">{selectedExecutionId}</span>
+            </div>
+            <Button type="dark" action={goToExecutions}> Show Record Executions </Button>
+        {/if}
     </Card>
     <div class="execution-view__pagination-container">
         <div class="execution-view__pagination-container__executions">
@@ -100,7 +111,6 @@
         </div>
     </div>
 </div>
-
 
 <style lang="scss">
     @import '../../../styles/variables.scss';
@@ -139,6 +149,29 @@
                 display: flex;
                 justify-content: center;
             }
+        }
+    }
+
+    /* Execution card info style */
+    .execution-card-info-item {
+        display: flex;
+        gap: 2px;
+        flex-direction: column;
+        margin: 4px 8px;
+
+        .execution-card-info-label {
+            font-size: 14px;
+            line-height: 140%;
+            font-weight: 400;
+            color: $c-gray-light;
+        }
+
+        .execution-card-info-value {
+            font-size: 16px;
+            line-height: 140%;
+            font-weight: 600;
+            max-width: min-content;
+            overflow-wrap: break-word;
         }
     }
 </style>
