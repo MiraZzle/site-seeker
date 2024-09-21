@@ -23,6 +23,7 @@ import { ruruHTML } from "ruru/server";
 import StartController from "./controllers/startController.mjs";
 import ExecutionsController from "./controllers/executionsController.mjs";
 import GetController from "./controllers/getController.mjs";
+import { schema } from "./graphqlSchema.mjs";
 
 // Define this file's __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -410,70 +411,11 @@ app.get("/api/executions/:id", async (req, res) => {
 	}
 })
 
-
-// GraphQL schema
-const WebPageType = new GraphQLObjectType({
-	name: "WebPage",
-	fields: {
-		identifier: { type: GraphQLID },
-		label: { type: GraphQLString },
-		url: { type: GraphQLString },
-		regexp: { type: GraphQLString },
-		tags: { type: new GraphQLList(GraphQLString) },
-		active: { type: GraphQLBoolean },
-		periodicity: { type: GraphQLString },
-	},
-});
-
-const NodeType = new GraphQLObjectType({
-	name: "Node",
-	fields: () => ({
-		id: { type: GraphQLID },
-		title: { type: GraphQLString },
-		url: { type: GraphQLString },
-		crawlTime: { type: GraphQLString },
-		links: { type: new GraphQLList(NodeType) },
-		owner: { type: WebPageType },
-	}),
-});
-
-const schema = new GraphQLSchema({
-	query: new GraphQLObjectType({
-		name: "Query",
-		fields: {
-			websites: {
-				type: new GraphQLList(WebPageType),
-				resolve: async () => {
-					const records = await model.getAllWebsiteRecords();
-					return records.map((record) => ({
-						identifier: record.id,
-						label: record.label,
-						url: record.url,
-						regexp: record.boundaryRegExp,
-						tags: record.tags,
-						active: record.isActive,
-						periodicity: record.periodicity,
-					}));
-				},
-			},
-			nodes: {
-				type: new GraphQLList(NodeType),
-				args: {
-					webPages: { type: new GraphQLList(GraphQLID) },
-				},
-				resolve: async (_, { webPages }) => {
-					const nodes = await model.getNodesByWebPageIds(webPages);
-					return nodes;
-				}
-			}
-		},
-	}),
-});
-
 app.all(
 	"/graphql",
 	createHandler({
 		schema: schema,
+		context: { model },
 	})
 );
 
