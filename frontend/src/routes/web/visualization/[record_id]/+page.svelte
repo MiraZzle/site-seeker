@@ -101,8 +101,8 @@
             </div>
             <div class="record-card-info-item">
                 <span class="record-card-info-label">Records Crawled</span>
-                <SelectInput 
-                    options={recordsCrawled} 
+                <SelectInput
+                    options={recordsCrawled}
                     bind:value={startExecutionId}
                     on:change={
                         (event) => {
@@ -162,7 +162,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: $c-gray-bg;
+            border: 1px solid $c-gray-outline;
             width: 100%;
         }
         &-i {
