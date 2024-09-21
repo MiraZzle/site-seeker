@@ -99,7 +99,8 @@
                 <span class="record-card-info-label">Crawl Time</span>
                 <span class="record-card-info-value">{nodeTime}</span>
             </div>
-            <div class="record-card-info-item">
+            <div class="record-card-info-item record-card-info-item__button">
+                <div>
                 <span class="record-card-info-label">Records Crawled</span>
                 <SelectInput
                     options={recordsCrawled}
@@ -110,6 +111,7 @@
                         }
                     }
                 />
+                </div>
                 <div class="record-card-start-execution-button">
                     <Button type="primary" disabled={!recordSelected} action={() => onStartExecution(startExecutionId)}> Start Execution </Button>
                 </div>
@@ -164,6 +166,7 @@
             justify-content: center;
             border: 1px solid $c-gray-outline;
             width: 100%;
+            border-radius: 8px;
         }
         &-i {
             &-container {
@@ -209,6 +212,12 @@
                         gap: 2px;
                         flex-direction: column;
                         margin: 4px 8px;
+
+                        &__button {
+                            display: flex;
+                            gap: 8px;
+                            flex-direction: column;
+                        }
 
                         .record-card-info-label {
                             font-size: 14px;
