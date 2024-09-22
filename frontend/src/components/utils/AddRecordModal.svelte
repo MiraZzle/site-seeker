@@ -7,12 +7,14 @@
     import Header from "$components/elements/typography/Header.svelte";
     import Paragraph from "$components/elements/typography/Paragraph.svelte";
     import TextAreaInput from "./TextAreaInput.svelte";
+    import { goto } from "$app/navigation";
 
     const timeOptions = ["Seconds", "Minutes", "Hours", "Days"];
     export let getWebsiteRecords: () => void = () => console.log("getWebsiteRecords not provided");
     export let selectedTime = timeOptions[0];
     export let showModal = false;
     export let url: string = "";
+    export let goToNewWebsiteRecord: boolean = false;
 
     // Form data
     let boundaryRegExp = "";
@@ -112,7 +114,7 @@
                 console.log("Record added:", result);
                 getWebsiteRecords(); // Reload records after successful addition
                 showModal = false; // Close modal after success
-
+                
                 // Clear the form fields
                 url = "";
                 boundaryRegExp = "";
@@ -121,6 +123,13 @@
                 tags = "";
                 isActive = false;
                 selectedTime = timeOptions[0]; // Reset selected time to default
+                
+                // Go to the new record if the flag is set
+                const newWebsiteRecordId = result.lastId;
+                if (goToNewWebsiteRecord) {
+                    window.location.href = `/visualization/${newWebsiteRecordId}?livemode=true`;
+                }
+                
             } else {
                 console.error("Failed to add record:", response.statusText);
             }

@@ -10,8 +10,9 @@ class AdditionController {
             throw new Error(`Validation error: ${validationErrors.join(", ")}`);
         }
 
-        const webisteRecordWithId = await this.model.addWebsiteRecord(websiteRecord);
-        crawlerManager.scheduleCrawl(webisteRecordWithId);
+        const websiteRecordWithId = await this.model.addWebsiteRecord(websiteRecord);
+        crawlerManager.scheduleCrawl(websiteRecordWithId);
+        return websiteRecordWithId.id;
     }
 
     validateWebsiteRecord(record) {

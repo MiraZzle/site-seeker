@@ -1,38 +1,45 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { type ApiResponseData, type GraphData, type GraphNode } from "$types/visualizationTypes";
+  import { onDestroy, onMount, tick } from "svelte";
+  import { type ApiResponseData, type ApiResponseDataWrapper, type GraphData, type GraphNode } from "$types/visualizationTypes";
   import cytoscape from "cytoscape";
   // @ts-ignore
   import coseBilkent from "cytoscape-cose-bilkent";
-  import { getDomainViewData, getWebsiteViewData, getCytoscapeEdges, getCytoscapeNodes, applyLayout, cytoscapeStyles } from "$utils/visualizationUtils";
+  import { getDomainViewData, getWebsiteViewData, getCytoscapeEdges, getCytoscapeNodes, applyLayout, cytoscapeStyles, getNodesByRecordId } from "$utils/visualizationUtils";
 
   cytoscape.use(coseBilkent);
 
   // Props
-  export let liveMode: boolean;
-  export let domainMode: boolean;
+  export let liveMode: boolean = false;
+  export let domainMode: boolean = false;
+  export let fetchedRecordId: string;
   export let fetchedData: ApiResponseData;
   export let updateNodeDetailsCardCallback: (selectedNode: GraphNode) => void;
 
   // Constants and variables
-  const LIVE_MODE_INTERVAL = 1000;
+  const LIVE_MODE_INTERVAL = 2000;
   let graphContainer: HTMLDivElement;
   let cyInstance: cytoscape.Core;
-  let intervalId: number;
+  let intervalId: number | undefined = undefined;
 
   function getFormattedData(domainMode: boolean): GraphData {
     return domainMode ? getDomainViewData(fetchedData) : getWebsiteViewData(fetchedData);
   }
 
-  // Lifecycle
-  onMount(() => {
-    // live mode will NEVER be enabled in the first render, so we can safely call the getData function
-    const extractedData: GraphData = getFormattedData(domainMode);
-    createGraph(extractedData)
-  });
+  async function fetchNewData(): Promise<void> {
+    fetchedData = await getNodesByRecordId(fetchedRecordId);
+  }
 
+  function stopLiveMode() {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = undefined;
+    }
+  }
+  
   function startLiveMode(domainModeValue: boolean) {
-    intervalId = setInterval(() => {
+    stopLiveMode();
+    intervalId = setInterval(async () => {
+      fetchNewData();
       const extractedData: GraphData = getFormattedData(domainModeValue);
       showGraph(extractedData);
     }, LIVE_MODE_INTERVAL);
@@ -40,10 +47,20 @@
   }
 
   function startStaticMode(domainModeValue: boolean) {
-    if (intervalId) clearInterval(intervalId);
+    stopLiveMode();
     const extractedData: GraphData = getFormattedData(domainModeValue);
     showGraph(extractedData);
   }
+  
+  // Lifecycle
+  onMount(() => {
+    const extractedData: GraphData = getFormattedData(domainMode);
+    createGraph(extractedData);
+  });
+
+  onDestroy(() => {
+    if (intervalId) clearInterval(intervalId);
+  })
 
   $: {
     if (liveMode) {

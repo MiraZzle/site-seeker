@@ -85,7 +85,7 @@ export function getDomainViewData(rawData: ApiResponseData): GraphData {
 		return { source, target };
 	});
 	const nodes = Array.from(domainNodeMap.values());
-	
+
 	return { nodes, links };
 }
 
@@ -117,24 +117,23 @@ export function getWebsiteViewData(rawData: ApiResponseData): GraphData {
 		});
 	});
 
-	
 	// Process edges and store them in the uniqueLinks set
 	extractedNodes.forEach((node: CrawledNode) => {
 		node.links.forEach((link: LinkNode) => {
 			const [source, target] = [node.url, link.url].sort();
 			const edgeKey = `${source}--${target}`; // Create a unique key for the edge
-			
+
 			uniqueLinks.add(edgeKey);
 		});
 	});
-	
+
 	// Convert the links to edges
 	const links = Array.from(uniqueLinks).map((edge) => {
 		const [source, target] = edge.split("--");
 		return { source, target };
 	});
 	const nodes = Array.from(nodeMap.values());
-	
+
 	return { nodes, links };
 }
 
@@ -200,16 +199,48 @@ export const cytoscapeStyles: cytoscape.Stylesheet[] = [
 	},
 ];
 
-export async function getWebsiteRecordsByNodeId(
-	nodeId: string
-): Promise<WebsiteRecord[]> {
+export async function getWebsiteRecordsByNodeId(nodeId: string): Promise<WebsiteRecord[]> {
 	try {
 		const response = await axios.get(
-			`http://localhost:3000/api/websiteRecords/${nodeId}`
+			`http://localhost:3000/api/websiteRecords/nodes/${nodeId}`
 		);
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching website records:", error);
 		throw error;
 	}
+}
+
+export async function getNodesByRecordId(record_id: string): Promise<ApiResponseData> {
+	const graphqlQuery = `
+	query GetNodesByRecordId($webPageIds: [ID!]) {
+		nodes(webPages: $webPageIds) {
+			id
+			title
+			url
+			crawlTime
+			links {
+				title
+				url
+			}
+			owner {
+				identifier
+				label
+				url
+			}
+		}
+    }`;
+
+	const response = await axios
+		.post("http://localhost:3000/graphql", {
+			query: graphqlQuery,
+			variables: { webPageIds: [record_id] },
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+		.catch((error) => {
+			console.error("Error fetching data from GraphQL API", error);
+		});
+	return response?.data;
 }

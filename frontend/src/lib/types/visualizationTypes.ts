@@ -6,6 +6,13 @@ export type ApiResponseData = {
 	};
 };
 
+// API: the raw data from the api with the record id
+export type ApiResponseDataWrapper = {
+	recordId: string;
+	recordData: ApiResponseData;
+	liveModeState: boolean;
+};
+
 // API:
 export type CrawledNode = {
 	id: string;
@@ -32,14 +39,14 @@ export type Owner = {
 
 // API: website record from the api
 export type WebsiteRecord = {
-	id: number,
-	url: string,
-	boundaryRegExp: string,
-	periodicity: number,
-	label: string,
-	isActive: boolean,
-	tags: string[],
-	isBeingCrawled: boolean,
+	id: number;
+	url: string;
+	boundaryRegExp: string;
+	periodicity: number;
+	label: string;
+	isActive: boolean;
+	tags: string[];
+	isBeingCrawled: boolean;
 };
 
 /// GRAPH TYPES

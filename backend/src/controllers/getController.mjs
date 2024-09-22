@@ -10,6 +10,10 @@ class GetController {
     async getWebsiteRecordById(id) {
 		return await this.model.getWebsiteRecordById(id);
 	}
+
+	async getWebsiteRecordByNodeId(nodeId) {
+		return await this.model.getWebsiteRecordByNodeId(nodeId);
+	}
 }
 
 export default GetController;
