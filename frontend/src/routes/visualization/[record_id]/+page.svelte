@@ -6,14 +6,14 @@
     import Card from "$components/utils/Card.svelte";
     import Toggle from "$components/utils/Toggle.svelte";
 	import NodeGraph from "$components/utils/NodeGraph.svelte";
-    import { type CrawledNode, type GraphNode, type WebsiteRecord } from "$types/visualizationTypes";
+    import { type ApiResponseDataWrapper, type CrawledNode, type GraphNode, type WebsiteRecord } from "$types/visualizationTypes";
 	import Button from "$components/elements/typography/Button.svelte";
     import AddRecordModal from "$components/utils/AddRecordModal.svelte";
 	import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
     import { getWebsiteRecordsByNodeId } from "$utils/visualizationUtils.js";
 
-    let liveMode: boolean = false;
-    let domainMode: boolean = false;
+    let liveModeStatus: boolean = false;
+    let domainModeStatus: boolean = false;
     let selectedNodeCrawled: boolean = false;
     let selectedNodeForDetailsCard: boolean = false;
     let recordSelected: boolean = false;
@@ -93,22 +93,23 @@
             if (isCrawledNode) {
                 const records = await getWebsiteRecordsByNodeId((selectedNodeData as CrawledNode).id);
                 const recordIds = records.map((record: WebsiteRecord) => record.id.toString());
-                recordsCrawled = [...recordIds];
+                recordsCrawled = Array.from(new Set(recordIds));
             }
         }
     }
 
     export let data;
-    const { recordId, recordData } = data;
+    const wrappedData: ApiResponseDataWrapper = data;
+    liveModeStatus = wrappedData.liveModeState;
 </script>
 
-<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} url={nodeUrl} />
+<AddRecordModal bind:showModal={addWebsiteRecordModalVisible} url={nodeUrl} goToNewWebsiteRecord={true} />
 <ExecutionStartedModal bind:showModal={executionStartedModalVisible} id={parseInt(startExecutionId)} />
 
 <Navbar activePage=""/>
 <div class="visualization-i-container">
     <div class="visualization-i-info">
-        <Header type={3}> Graph of Record with ID {recordId} </Header>
+        <Header type={3}> Graph of Record with ID {wrappedData.recordId} </Header>
     </div>
 </div>
 <div class="visualization-i-graph">
@@ -156,16 +157,18 @@
         <div class="visualization-i-graph__main__toggles">
             <div class="visualization__toggle-container">
                 <span> Live Mode </span>
-                <Toggle bind:checked={liveMode}/>
+                <Toggle bind:checked={liveModeStatus}/>
             </div>
             <div class="visualization__toggle-container">
                 <span> Domain Mode </span>
-                <Toggle bind:checked={domainMode}/>
+                <Toggle bind:checked={domainModeStatus}/>
             </div>
         </div>
         <div class="visualization-i-graph__main__graph">
                 <div class="visualization__graph-container">
-                    <NodeGraph liveMode={liveMode} domainMode={domainMode} fetchedData={recordData} updateNodeDetailsCardCallback={updateDetailsCard} />
+                    <NodeGraph bind:liveMode={liveModeStatus} domainMode={domainModeStatus} 
+                    fetchedRecordId={wrappedData.recordId}
+                    fetchedData={wrappedData.recordData} updateNodeDetailsCardCallback={updateDetailsCard} />
                 </div>
         </div>
     </div>

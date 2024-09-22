@@ -1,38 +1,17 @@
-import axios from "axios";
+import { getNodesByRecordId } from "$utils/visualizationUtils";
 
 /** @type {import('./$types').PageServerLoad} */
-export const load = async ({ fetch, params }) => {
+export const load = async ({ fetch, params, url }) => {
 	let record_id = params.record_id;
 
-	const graphqlQuery = `
-    query GetNodesByRecordId($webPageIds: [ID!]) {
-      nodes(webPages: $webPageIds) {
-        id
-        title
-        url
-        crawlTime
-        links {
-          title
-          url
-        }
-        owner {
-          identifier
-          label
-          url
-        }
-      }
-    }`;
+	const isLiveModeSet = url.searchParams.get("livemode") === "true";
 
-  const response = await axios
-    .post("http://localhost:3000/graphql", {
-      query: graphqlQuery,
-      variables: { webPageIds: [record_id] },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .catch((error) => {
-      console.error("Error fetching data from GraphQL API", error);
-    });
-	return { recordId: record_id, recordData: response?.data };
+	const responseData = await getNodesByRecordId(record_id);
+	// This below is the ApiResponseDataWrapper type
+	const dataWrapper = {
+		recordId: record_id,
+		recordData: responseData,
+		liveModeState: isLiveModeSet,
+	};
+	return dataWrapper;
 };
