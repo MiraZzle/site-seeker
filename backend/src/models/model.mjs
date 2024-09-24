@@ -84,7 +84,7 @@ class Model {
             } else {
               resolve(this.lastID);
             }
-          },
+          }
         );
         stmt.finalize();
       });
@@ -215,7 +215,7 @@ class Model {
             } else {
               resolve();
             }
-          },
+          }
         );
       });
       return true;
@@ -252,7 +252,7 @@ class Model {
               return this.db.run("ROLLBACK", () => reject(err)); // Rollback on error
             }
             resolve();
-          },
+          }
         );
       });
 
@@ -266,7 +266,7 @@ class Model {
               return this.db.run("ROLLBACK", () => reject(err)); // Rollback on error
             }
             resolve();
-          },
+          }
         );
       });
 
@@ -299,7 +299,7 @@ class Model {
 
   async updateWebsiteRecord(
     id,
-    { url, boundaryRegExp, periodicity, label, isActive, tags },
+    { url, boundaryRegExp, periodicity, label, isActive, tags }
   ) {
     try {
       await new Promise((resolve, reject) => {
@@ -324,7 +324,7 @@ class Model {
             } else {
               resolve();
             }
-          },
+          }
         );
       });
       return true;
@@ -359,7 +359,7 @@ class Model {
             } else {
               resolve(this.lastID);
             }
-          },
+          }
         );
         stmt.finalize();
       });
@@ -415,7 +415,7 @@ class Model {
         url,
         crawlTime,
         title,
-        JSON.stringify(outgoingLinks),
+        JSON.stringify(outgoingLinks)
       );
       stmt.finalize();
     });
@@ -446,7 +446,7 @@ class Model {
       const nodesWithLinks = await Promise.all(
         nodes.map(async (node) => {
           const outgoingLinks = JSON.parse(node.outgoingLinks).map((link) =>
-            normalizeUrl(link.url),
+            normalizeUrl(link.url)
           );
           outgoingLinks.forEach((link) => uniqueLinks.add(link));
 
@@ -519,7 +519,7 @@ class Model {
               active: node.ownerActive,
             },
           };
-        }),
+        })
       );
 
       // Remove duplicate nodes by URL
@@ -640,7 +640,7 @@ class Model {
         this.db.all(getExecutionIdsQuery, [nodeUrl], (err, rows) => {
           if (err) {
             reject(
-              "Error retrieving execution IDs from crawled_data table: " + err,
+              "Error retrieving execution IDs from crawled_data table: " + err
             );
             return;
           }
@@ -675,7 +675,7 @@ class Model {
 
             if (!websiteRows || websiteRows.length === 0) {
               reject(
-                "No website records found for the provided execution IDs.",
+                "No website records found for the provided execution IDs."
               );
               return;
             }

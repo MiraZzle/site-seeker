@@ -1,15 +1,15 @@
 class ExecutionsController {
-	constructor(model) {
-		this.model = model;
-	}
+  constructor(model) {
+    this.model = model;
+  }
 
-	async getAllExecutions() {
-        return await this.model.getAllExecutions();
-	}
+  async getAllExecutions() {
+    return await this.model.getAllExecutions();
+  }
 
-    async getExecutionsForWebsiteRecord(id) {
-        return await this.model.getExecutionsForWebsiteRecord(id)
-    }
+  async getExecutionsForWebsiteRecord(id) {
+    return await this.model.getExecutionsForWebsiteRecord(id);
+  }
 }
 
 export default ExecutionsController;

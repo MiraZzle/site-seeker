@@ -1,10 +1,23 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
-  import { type ApiResponseData, type ApiResponseDataWrapper, type GraphData, type GraphNode } from "$types/visualizationTypes";
+  import {
+    type ApiResponseData,
+    type ApiResponseDataWrapper,
+    type GraphData,
+    type GraphNode
+  } from "$types/visualizationTypes";
   import cytoscape from "cytoscape";
   // @ts-ignore
   import coseBilkent from "cytoscape-cose-bilkent";
-  import { getDomainViewData, getWebsiteViewData, getCytoscapeEdges, getCytoscapeNodes, applyLayout, cytoscapeStyles, getNodesByRecordId } from "$utils/visualizationUtils";
+  import {
+    getDomainViewData,
+    getWebsiteViewData,
+    getCytoscapeEdges,
+    getCytoscapeNodes,
+    applyLayout,
+    cytoscapeStyles,
+    getNodesByRecordId
+  } from "$utils/visualizationUtils";
 
   cytoscape.use(coseBilkent);
 
@@ -19,7 +32,7 @@
   const LIVE_MODE_INTERVAL = 2000;
   let graphContainer: HTMLDivElement;
   let cyInstance: cytoscape.Core;
-  let intervalId: number | undefined = undefined;
+  let intervalId: number | any = undefined;
 
   function getFormattedData(domainMode: boolean): GraphData {
     return domainMode ? getDomainViewData(fetchedData) : getWebsiteViewData(fetchedData);
@@ -35,7 +48,7 @@
       intervalId = undefined;
     }
   }
-  
+
   function startLiveMode(domainModeValue: boolean) {
     stopLiveMode();
     intervalId = setInterval(async () => {
@@ -51,7 +64,7 @@
     const extractedData: GraphData = getFormattedData(domainModeValue);
     showGraph(extractedData);
   }
-  
+
   // Lifecycle
   onMount(() => {
     const extractedData: GraphData = getFormattedData(domainMode);
@@ -60,7 +73,7 @@
 
   onDestroy(() => {
     if (intervalId) clearInterval(intervalId);
-  })
+  });
 
   $: {
     if (liveMode) {
@@ -69,8 +82,7 @@
       startStaticMode(domainMode);
     }
   }
-  
-  ////////////////////////////////////////////////// GRAPH CONTROL METHODS
+
   function showGraph(graphData: GraphData) {
     if (!cyInstance) return;
     cyInstance.elements().remove(); // reset the graph
@@ -92,7 +104,7 @@
       maxZoom: 4,
       zoomingEnabled: true,
       userZoomingEnabled: true,
-      wheelSensitivity: 0.1,
+      wheelSensitivity: 0.1
     });
     applyLayout(cyInstance);
 

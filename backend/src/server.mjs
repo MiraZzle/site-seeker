@@ -1,24 +1,13 @@
 import express from "express";
-import http from "http";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
-import { WebSocketServer } from "ws";
 import sqlite3 from "sqlite3";
 import { fileURLToPath, pathToFileURL } from "url";
 import path from "path";
 import cors from "cors";
 
 import { createHandler } from "graphql-http/lib/use/express";
-import {
-	graphql,
-	GraphQLSchema,
-	GraphQLObjectType,
-	GraphQLString,
-	GraphQLID,
-	GraphQLList,
-	GraphQLBoolean,
-} from "graphql";
 import { ruruHTML } from "ruru/server";
 import StartController from "./controllers/startController.mjs";
 import ExecutionsController from "./controllers/executionsController.mjs";
@@ -31,21 +20,23 @@ const __dirname = path.dirname(__filename);
 
 // Define all the necessary paths
 const dbPath = path.join(__dirname, "./db/crawler.db");
-const modelPath = pathToFileURL(path.join(__dirname, "./models/model.mjs")).href;
+const modelPath = pathToFileURL(
+  path.join(__dirname, "./models/model.mjs")
+).href;
 const additionControllerPath = pathToFileURL(
-	path.join(__dirname, "./controllers/additionController.mjs")
+  path.join(__dirname, "./controllers/additionController.mjs")
 ).href;
 const deletionControllerPath = pathToFileURL(
-	path.join(__dirname, "./controllers/deletionController.mjs")
+  path.join(__dirname, "./controllers/deletionController.mjs")
 ).href;
 const updateControllerPath = pathToFileURL(
-	path.join(__dirname, "./controllers/updateController.mjs")
+  path.join(__dirname, "./controllers/updateController.mjs")
 ).href;
 const dataFormatterPath = pathToFileURL(
-	path.join(__dirname, "./utils/dataFormatter.mjs")
+  path.join(__dirname, "./utils/dataFormatter.mjs")
 ).href;
 const crawlerManagerPath = pathToFileURL(
-	path.join(__dirname, "./crawlers/crawlerManager.mjs")
+  path.join(__dirname, "./crawlers/crawlerManager.mjs")
 ).href;
 
 // Dynamically import modules
@@ -61,13 +52,13 @@ const db = new sqlite3.Database(dbPath);
 const model = new Model(db);
 const crawlerManager = new CrawlerManager(model);
 const app = express();
-const server = http.createServer(app);
-const wsServer = new WebSocketServer({ server });
 const port = 3000;
 
-app.use(cors({
-	origin: '*' // Replace this with the URL of your frontend
-}));
+app.use(
+  cors({
+    origin: "*", // Replace this with the URL of your frontend
+  })
+);
 
 // Middleware to parse JSON data
 app.use(express.json());
@@ -75,14 +66,14 @@ app.use(cors());
 
 // Swagger API documentation setup
 const options = {
-	definition: {
-		openapi: "3.0.0",
-		info: {
-			title: "Crawler API",
-			version: "1.0.0",
-		},
-	},
-	apis: [__filename], // Path to your API docs
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Crawler API",
+      version: "1.0.0",
+    },
+  },
+  apis: [__filename], // Path to your API docs
 };
 
 const swaggerSpec = swaggerJSDoc(options);
@@ -132,8 +123,8 @@ const swaggerSpec = swaggerJSDoc(options);
  *         description: Returns a message.
  */
 app.get("/", (req, res) => {
-	const rootMessage = { message: "This is the root path!" };
-	res.json(rootMessage);
+  const rootMessage = { message: "This is the root path!" };
+  res.json(rootMessage);
 });
 
 /**
@@ -154,15 +145,14 @@ app.get("/", (req, res) => {
  *         description: Internal server error.
  */
 app.get("/api/websiteRecords/", async (req, res) => {
-	const getController = new GetController(model);
-	const result = await getController.getAllWebsiteRecords();
-	if (result) {
-		res.status(200).json(result);
-	} else {
-		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
-	}
+  const getController = new GetController(model);
+  const result = await getController.getAllWebsiteRecords();
+  if (result) {
+    res.status(200).json(result);
+  } else {
+    res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
 });
-
 
 /**
  * @swagger
@@ -197,13 +187,13 @@ app.get("/api/websiteRecords/", async (req, res) => {
  *         description: Internal server error.
  */
 app.get("/api/websiteRecords/nodes/:id", async (req, res) => {
-	const getController = new GetController(model);
-	const result = await getController.getWebsiteRecordByNodeId(req.params.id);
-	if (result) {
-		res.status(200).json(result);
-	} else {
-		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
-	}
+  const getController = new GetController(model);
+  const result = await getController.getWebsiteRecordByNodeId(req.params.id);
+  if (result) {
+    res.status(200).json(result);
+  } else {
+    res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
 });
 
 /**
@@ -222,20 +212,22 @@ app.get("/api/websiteRecords/nodes/:id", async (req, res) => {
  *         description: Successfully added the website record.
  */
 app.post("/api/websiteRecords/add", async (req, res) => {
-    const additionController = new AdditionController(model);
-    const websiteRecordTemp = req.body;
-    const websiteRecord = DataFormatter.getRecordFromJson(websiteRecordTemp);
+  const additionController = new AdditionController(model);
+  const websiteRecordTemp = req.body;
+  const websiteRecord = DataFormatter.getRecordFromJson(websiteRecordTemp);
 
-    try {
-        const addedWebsiteRecordId = await additionController.addWebsiteRecord(websiteRecord, crawlerManager);
-		res.status(200).json(
-			{
-				message: `Website record added with id ${addedWebsiteRecordId}`,
-				lastId: addedWebsiteRecordId,
-			});
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+  try {
+    const addedWebsiteRecordId = await additionController.addWebsiteRecord(
+      websiteRecord,
+      crawlerManager
+    );
+    res.status(200).json({
+      message: `Website record added with id ${addedWebsiteRecordId}`,
+      lastId: addedWebsiteRecordId,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 });
 
 /**
@@ -254,12 +246,12 @@ app.post("/api/websiteRecords/add", async (req, res) => {
  *         description: Successfully deleted the website record.
  */
 app.delete("/api/websiteRecords/delete/:id", (req, res) => {
-	const deletionController = new DeletionController(model);
-	const requestedId = req.params.id;
-	deletionController.deleteWebsiteRecord(Number(requestedId), crawlerManager);
-	res.status(200).json({
-		message: `Deleted website record with id ${requestedId}`,
-	});
+  const deletionController = new DeletionController(model);
+  const requestedId = req.params.id;
+  deletionController.deleteWebsiteRecord(Number(requestedId), crawlerManager);
+  res.status(200).json({
+    message: `Deleted website record with id ${requestedId}`,
+  });
 });
 
 /**
@@ -284,16 +276,18 @@ app.delete("/api/websiteRecords/delete/:id", (req, res) => {
  *         description: Successfully updated the website record.
  */
 app.put("/api/websiteRecords/update/:id", async (req, res) => {
-    const updateController = new UpdateController(model);
-    const requestedId = req.params.id;
-    const updatedRecord = req.body;
+  const updateController = new UpdateController(model);
+  const requestedId = req.params.id;
+  const updatedRecord = req.body;
 
-    try {
-        await updateController.updateWebsiteRecord(requestedId, updatedRecord);
-        res.status(200).json({ message: `Updated website record with id ${requestedId}` });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+  try {
+    await updateController.updateWebsiteRecord(requestedId, updatedRecord);
+    res.status(200).json({
+      message: `Updated website record with id ${requestedId}`,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 });
 
 /**
@@ -323,14 +317,14 @@ app.put("/api/websiteRecords/update/:id", async (req, res) => {
  *         description: Internal server error.
  */
 app.post("/api/websiteRecords/start/:id", (req, res) => {
-    const startController = new StartController(model);
-    const requestedId = req.params.id;
-    
-    startController.startWebsiteRecordExecution(requestedId, crawlerManager);
-    
-    res.status(200).json({
-        message: `Execution of Record ${requestedId} has started!`,
-    });
+  const startController = new StartController(model);
+  const requestedId = req.params.id;
+
+  startController.startWebsiteRecordExecution(requestedId, crawlerManager);
+
+  res.status(200).json({
+    message: `Execution of Record ${requestedId} has started!`,
+  });
 });
 
 /**
@@ -372,14 +366,14 @@ app.post("/api/websiteRecords/start/:id", (req, res) => {
  *         description: Internal server error.
  */
 app.get("/api/executions", async (req, res) => {
-	const executionsController = new ExecutionsController(model);
-	const result = await executionsController.getAllExecutions();
-	if (result) {
-		res.status(200).json(result);
-	} else {
-		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
-	}
-})
+  const executionsController = new ExecutionsController(model);
+  const result = await executionsController.getAllExecutions();
+  if (result) {
+    res.status(200).json(result);
+  } else {
+    res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
+});
 
 /**
  * @swagger
@@ -437,32 +431,33 @@ app.get("/api/executions", async (req, res) => {
  *         description: Internal server error.
  */
 app.get("/api/executions/:id", async (req, res) => {
-	const executionsController = new ExecutionsController(model);
-	const requestedId = req.params.id;
+  const executionsController = new ExecutionsController(model);
+  const requestedId = req.params.id;
 
-	const result = await executionsController.getExecutionsForWebsiteRecord(requestedId);
-	if (result) {
-		res.status(200).json(result);
-	} else {
-		res.status(500).json({ message: "INTERNAL SERVER ERROR" });
-	}
-})
+  const result =
+    await executionsController.getExecutionsForWebsiteRecord(requestedId);
+  if (result) {
+    res.status(200).json(result);
+  } else {
+    res.status(500).json({ message: "INTERNAL SERVER ERROR" });
+  }
+});
 
 app.all(
-	"/graphql",
-	createHandler({
-		schema: schema,
-		context: { model },
-	})
+  "/graphql",
+  createHandler({
+    schema: schema,
+    context: { model },
+  })
 );
 
 app.get("/graphiql", (_req, res) => {
-	res.type("html");
-	res.end(ruruHTML({ endpoint: "/graphql" }));
+  res.type("html");
+  res.end(ruruHTML({ endpoint: "/graphql" }));
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(port, () => {
-	console.log("Server is listening on port " + port);
+  console.log("Server is listening on port " + port);
 });
