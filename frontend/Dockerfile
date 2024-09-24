@@ -1,6 +1,6 @@
 FROM node:18.18.0-alpine AS builder
 
-WORKDIR /app
+WORKDIR /siteseeker/frontend
 
 COPY package*.json .
 
@@ -14,11 +14,11 @@ RUN npm prune --prod
 
 FROM node:18.8.0-alpine AS deployer
 
-WORKDIR /app
+WORKDIR /siteseeker/frontend
 
-COPY --from=builder /app/.svelte-kit/output build/
-COPY --from=builder /app/package.json .
+COPY --from=builder /siteseeker/frontend/.svelte-kit/output build/
+COPY --from=builder /siteseeker/frontend/package.json .
 
-EXPOSE 3000
+EXPOSE 5173
 
 CMD [ "node", "build" ]
