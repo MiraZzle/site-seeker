@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: siteseeker/frontend
+    restart: always
+    depends_on:
+      - backend
+    build:
+      context: ./frontend/
+    ports:
+      - 5173
+
+  backend:
+    image: siteseeker/backend
+    restart: always
+    build:
+      context: ./backend/
+    ports:
+      - 3000
