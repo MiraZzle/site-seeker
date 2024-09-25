@@ -10,7 +10,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - 5173
+      - 58444:5050
 
   backend:
     image: siteseeker/backend
@@ -18,4 +18,4 @@ services:
     build:
       context: ./backend
     ports:
-      - 3000
+      - 3000:3000

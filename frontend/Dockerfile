@@ -1,24 +1,18 @@
-FROM node:18.18.0-alpine AS builder
+FROM node:20.11-alpine
 
 WORKDIR /siteseeker/frontend
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm i -g npm
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-RUN npm run build
-RUN npm prune --prod
+RUN npm run build && npm prune --production
 
-FROM node:18.8.0-alpine AS deployer
+ENV PORT=5050
 
-WORKDIR /siteseeker/frontend
+EXPOSE 5050
 
-COPY --from=builder /siteseeker/frontend/.svelte-kit/output build/
-COPY --from=builder /siteseeker/frontend/package.json .
-
-EXPOSE 5173
-
-CMD [ "node", "build" ]
+CMD ["node", "build"]
