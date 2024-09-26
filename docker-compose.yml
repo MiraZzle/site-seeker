@@ -9,8 +9,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    environment:
+      - FRONTEND_PORT=${FRONTEND_PORT}
     ports:
-      - 58444:5050
+      - ${FRONTEND_PORT}:5050
 
   backend:
     image: siteseeker/backend
