@@ -52,7 +52,7 @@ const db = new sqlite3.Database(dbPath);
 const model = new Model(db);
 const crawlerManager = new CrawlerManager(model);
 const app = express();
-const port = process.env.BACKEND_PORT || 4000;
+const port = process.env.BACKEND_PORT || 3000;
 
 app.use(
   cors({
