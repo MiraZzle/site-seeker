@@ -12,8 +12,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the backend is running on (e.g., 3000)
-# TODO: Update the port number if the backend is running on a different port
-EXPOSE 3000
+EXPOSE ${BACKEND_PORT}
 
 # Start the backend server
 CMD ["node", "src/server.mjs"]

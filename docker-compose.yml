@@ -15,7 +15,9 @@ services:
   backend:
     image: siteseeker/backend
     restart: always
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT}
     build:
       context: ./backend
     ports:
-      - 3000:3000
+      - ${BACKEND_PORT}:${BACKEND_PORT}
