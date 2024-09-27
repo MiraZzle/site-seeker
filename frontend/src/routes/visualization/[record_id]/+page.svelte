@@ -5,16 +5,17 @@
   import Card from "$components/utils/Card.svelte";
   import Toggle from "$components/utils/Toggle.svelte";
   import NodeGraph from "$components/utils/NodeGraph.svelte";
+  import Button from "$components/elements/typography/Button.svelte";
+  import AddRecordModal from "$components/utils/AddRecordModal.svelte";
+  import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
+  import { getWebsiteRecordsByNodeId, getNodesByRecordId } from "$utils/visualizationUtils.js";
+  import { onMount } from "svelte";
   import {
     type ApiResponseDataWrapper,
     type CrawledNode,
     type GraphNode,
     type WebsiteRecord
   } from "$types/visualizationTypes";
-  import Button from "$components/elements/typography/Button.svelte";
-  import AddRecordModal from "$components/utils/AddRecordModal.svelte";
-  import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
-  import { getWebsiteRecordsByNodeId } from "$utils/visualizationUtils.js";
 
   let liveModeStatus: boolean = false;
   let domainModeStatus: boolean = false;
@@ -25,11 +26,27 @@
   let nodeTime: string = "";
   let nodeUrl: string = "";
   let recordsCrawled: string[] = [];
+  let recordId: string = "";
+  let recordData: any = null;
 
   // Button related variables
   let addWebsiteRecordModalVisible: boolean = false;
   let executionStartedModalVisible: boolean = false;
   let startExecutionId: string = "";
+
+  // Fetching data on component mount
+  onMount(async () => {
+    const params = new URLSearchParams(window.location.search);
+    const isLiveModeSet = params.get("livemode") === "true";
+    
+    recordId = window.location.pathname.split('/').pop()!;
+    try {
+      recordData = await getNodesByRecordId(recordId);
+      liveModeStatus = isLiveModeSet;
+    } catch (error) {
+      console.error('Error fetching nodes by record id:', error);
+    }
+  });
 
   function handleAddWebsiteRecord() {
     addWebsiteRecordModalVisible = true;
@@ -40,7 +57,6 @@
     startExecutionId = websiteRecordId;
 
     try {
-      // Send POST request to backend
       const response = await fetch(
         `http://localhost:3000/api/websiteRecords/start/${websiteRecordId}`,
         {
@@ -51,15 +67,12 @@
         }
       );
 
-      // Check if the request was successful
       if (!response.ok) {
         throw new Error("Failed to start execution");
       }
 
-      // Handle success (e.g., show a notification or log)
       console.log(`Execution of Record ${websiteRecordId} started successfully!`);
     } catch (error) {
-      // Handle error (e.g., show an error message or log)
       console.error("Error starting execution:", error);
     }
   }
@@ -85,6 +98,7 @@
     const isCrawledNode = chosenNode.classes.includes("uncrawled") ? false : true;
     const selectedNodeUrl = selectedNodeData.url;
     const selectedNodeCrawlTime = selectedNodeData.crawlTime;
+
     if (isSameNode(nodeUrl, selectedNodeUrl)) {
       unselectNode();
     } else {
@@ -92,17 +106,13 @@
       selectedNodeCrawled = isCrawledNode;
       nodeUrl = selectedNodeUrl;
       nodeTime = convertToTime(selectedNodeCrawlTime);
+      
       if (isCrawledNode) {
         const records = await getWebsiteRecordsByNodeId((selectedNodeData as CrawledNode).id);
-        const recordIds = records.map((record: WebsiteRecord) => record.id.toString());
-        recordsCrawled = Array.from(new Set(recordIds));
+        recordsCrawled = Array.from(new Set(records.map(record => record.id.toString())));
       }
     }
   }
-
-  export let data;
-  const wrappedData: ApiResponseDataWrapper = data;
-  liveModeStatus = wrappedData.liveModeState;
 </script>
 
 <AddRecordModal
@@ -118,7 +128,7 @@
 <Navbar activePage="" />
 <div class="visualization-i-container">
   <div class="visualization-i-info">
-    <Header type={3}>Graph of Record with ID {wrappedData.recordId}</Header>
+    <Header type={3}>Graph of Record with ID {recordId}</Header>
   </div>
 </div>
 <div class="visualization-i-graph">
@@ -141,7 +151,7 @@
               <SelectInput
                 options={recordsCrawled}
                 bind:value={startExecutionId}
-                on:change={(event) => {
+                on:change={() => {
                   recordSelected = true;
                 }}
               />
@@ -179,13 +189,15 @@
     </div>
     <div class="visualization-i-graph__main__graph">
       <div class="visualization__graph-container">
-        <NodeGraph
-          bind:liveMode={liveModeStatus}
-          domainMode={domainModeStatus}
-          fetchedRecordId={wrappedData.recordId}
-          fetchedData={wrappedData.recordData}
-          updateNodeDetailsCardCallback={updateDetailsCard}
-        />
+        {#if recordData && Object.keys(recordData).length > 0}
+          <NodeGraph
+            bind:liveMode={liveModeStatus}
+            domainMode={domainModeStatus}
+            fetchedRecordId={recordId}
+            fetchedData={recordData}
+            updateNodeDetailsCardCallback={updateDetailsCard}
+          />
+        {/if}
       </div>
     </div>
   </div>

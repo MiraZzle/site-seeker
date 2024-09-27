@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: siteseeker/frontend
+    restart: always
+    depends_on:
+      - backend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - FRONTEND_PORT=${FRONTEND_PORT}
+    ports:
+      - ${FRONTEND_PORT}:5050
+
+  backend:
+    image: siteseeker/backend
+    restart: always
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT}
+    build:
+      context: ./backend
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
