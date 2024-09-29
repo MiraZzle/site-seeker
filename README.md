@@ -14,6 +14,7 @@ You need to use Docker to use the application.
 git clone https://github.com/MiraZzle/webik-crawler.git
 docker compose up --build
 ```
+Once you have build the containers using the above command, you can use the ```docker compose up``` command to run the already built containers.
 
 You can also use the .env file in the root of the project to specify the ports for both the backend and the frontend. There is a default one in the repo. You can provide your own values in that file:
 
