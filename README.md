@@ -12,7 +12,7 @@ You need to use Docker to use the application.
 
 ```
 git clone https://github.com/MiraZzle/webik-crawler.git
-docker compose up
+docker compose up --build
 ```
 
 You can also use the .env file in the root of the project to specify the ports for both the backend and the frontend. There is a default one in the repo. You can provide your own values in that file:
