@@ -80,4 +80,4 @@ Once the application is running, visit http://localhost followed by the port num
 
 ## Documentation and Wiki
 
-For detailed information about the project's architecture, features, and usage examples, please visit our [GitHub Wiki](https://github.com/MiraZzle/webik-crawler/wiki).
+For detailed information about the project's architecture, features, and usage examples, please visit our [GitHub Wiki](https://github.com/MiraZzle/site-seeker/wiki).
