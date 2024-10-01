@@ -2,7 +2,6 @@
   import { onDestroy, onMount, tick } from "svelte";
   import {
     type ApiResponseData,
-    type ApiResponseDataWrapper,
     type GraphData,
     type GraphNode
   } from "$types/visualizationTypes";
@@ -16,8 +15,10 @@
     getCytoscapeNodes,
     applyLayout,
     cytoscapeStyles,
-    getNodesByRecordId
   } from "$utils/visualizationUtils";
+  import {
+    getNodesByRecordId,
+  } from "$lib/api/visualization";
 
   cytoscape.use(coseBilkent);
 

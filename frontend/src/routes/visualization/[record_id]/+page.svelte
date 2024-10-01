@@ -8,14 +8,13 @@
   import Button from "$components/elements/typography/Button.svelte";
   import AddRecordModal from "$components/utils/AddRecordModal.svelte";
   import ExecutionStartedModal from "$components/utils/ExecutionStartedModal.svelte";
-  import { getWebsiteRecordsByNodeId, getNodesByRecordId } from "$utils/visualizationUtils.js";
+  import { getWebsiteRecordsByNodeId, getNodesByRecordId } from "$lib/api/visualization";
   import { onMount } from "svelte";
   import {
-    type ApiResponseDataWrapper,
     type CrawledNode,
     type GraphNode,
-    type WebsiteRecord
   } from "$types/visualizationTypes";
+  import { fetchStartExecution } from "$lib/api/executions";
 
   let liveModeStatus: boolean = false;
   let domainModeStatus: boolean = false;
@@ -55,26 +54,8 @@
   async function onStartExecution(websiteRecordId: string) {
     executionStartedModalVisible = true;
     startExecutionId = websiteRecordId;
-
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/websiteRecords/start/${websiteRecordId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to start execution");
-      }
-
-      console.log(`Execution of Record ${websiteRecordId} started successfully!`);
-    } catch (error) {
-      console.error("Error starting execution:", error);
-    }
+    const numberWebsiteRecordId = parseInt(websiteRecordId);
+    await fetchStartExecution(numberWebsiteRecordId);
   }
 
   function convertToTime(time: string, locale: string = "cs-CZ") {
