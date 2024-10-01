@@ -101,24 +101,6 @@ class Model {
     };
   }
 
-  /* async getAllWebsiteRecords() {
-		try {
-			let rows = await new Promise((resolve, reject) => {
-				this.db.all("SELECT * FROM website_records", (err, rows) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(rows);
-					}
-				});
-			});
-			const result = Model.parseRows(rows);
-			return result;
-		} catch (err) {
-			console.error(err);
-			return [];
-		}
-	} */
   async getAllWebsiteRecords() {
     const query = `
 			SELECT wr.*, er.id as executionId, er.startTime as executionStartTime, er.endTime as executionEndTime, er.status as executionStatus
@@ -373,6 +355,7 @@ class Model {
       status,
     };
   }
+
   async updateExecution({ id, endTime, crawledCount, status }) {
     try {
       await new Promise((resolve, reject) => {
@@ -426,12 +409,13 @@ class Model {
       const nodes = await new Promise((resolve, reject) => {
         const placeholders = webPageIds.map(() => "?").join(",");
         const query = `
-				SELECT cd.*, wr.id as ownerId, wr.label as ownerLabel, wr.url as ownerUrl, wr.boundaryRegExp as ownerRegExp,
-				wr.tags as ownerTags, wr.isActive as ownerActive
-				FROM crawled_data cd
-				INNER JOIN execution_records er ON cd.executionId = er.id
-				INNER JOIN website_records wr ON er.websiteRecordId = wr.id
-				WHERE wr.id IN (${placeholders})
+        SELECT cd.*, wr.id as ownerId, wr.label as ownerLabel, wr.url
+        ownerUrl, wr.boundaryRegExp as ownerRegExp,
+        wr.tags as ownerTags, wr.isActive as ownerActive
+        FROM crawled_data cd
+        INNER JOIN execution_records er ON cd.executionId = er.id
+        INNER JOIN website_records wr ON er.websiteRecordId = wr.id
+        WHERE wr.id IN (${placeholders})
 			`;
         this.db.all(query, webPageIds, (err, rows) => {
           if (err) {
