@@ -453,46 +453,14 @@ class Model {
           }
 
           const uniqueLinksArray = Array.from(uniqueLinks);
-          const placeholders = uniqueLinksArray.map(() => "?").join(",");
-          const links = await new Promise((resolve, reject) => {
-            const query = `
-						SELECT cd.*
-						FROM crawled_data cd
-						INNER JOIN (
-						SELECT url, MAX(crawlTime) AS maxCrawlTime
-						FROM crawled_data
-						WHERE url IN (${placeholders})
-						GROUP BY url
-						) grouped_cd
-						ON cd.url = grouped_cd.url AND cd.crawlTime = grouped_cd.maxCrawlTime
-						`;
-            this.db.all(query, uniqueLinksArray, (err, linkRows) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(linkRows);
-              }
-            });
-          });
 
           return {
             id: node.id,
             title: node.title,
             url: node.url,
             crawlTime: node.crawlTime,
-            links: links.map((link) => ({
-              title: link.title,
-              url: link.url,
-              crawlTime: link.crawlTime,
-              links: [],
-              owner: {
-                identifier: node.ownerId,
-                label: node.ownerLabel,
-                url: node.ownerUrl,
-                regexp: node.ownerRegExp,
-                tags: JSON.parse(node.ownerTags),
-                active: node.ownerActive,
-              },
+            links: uniqueLinksArray.map((link) => ({
+              url: link,
             })),
             owner: {
               identifier: node.ownerId,

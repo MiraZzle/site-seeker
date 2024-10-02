@@ -10,8 +10,7 @@ node_modules
 .DS_Store
 Thumbs.db
 
-# Env
-.env
+# Environment
 .env.*
 !.env.example
 !.env.test
