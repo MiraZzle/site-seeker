@@ -6,7 +6,7 @@
   <div class="footer-links">
     <a href="/">Home</a>
     <a href={apiDocsHref} target="_blank">API</a>
-    <a href="/">GitHub</a>
+    <a href="https://github.com/MiraZzle/site-seeker" target="_blank">GitHub</a>
   </div>
 </footer>
 
