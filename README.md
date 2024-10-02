@@ -14,7 +14,7 @@ SiteSeeker is a minimalist web crawler designed for constructing detailed websit
 
 To run the application, you will need Docker installed.
 
-You can specify custom environment variables in the .env file located at the root of the project. By default, the following ports are used:
+You can specify custom environment variables in the .env file located at the root of the project. By default, the following ports are used for backend:
 
 ```bash
 BACKEND_PORT=3000
@@ -28,7 +28,7 @@ You can modify these values to suit your needs.
 To clone and run the project using Docker, follow these steps:
 
 ```
-git clone https://github.com/MiraZzle/webik-crawler.git
+git clone https://github.com/MiraZzle/site-seeker.git
 docker compose up --build
 ```
 
@@ -45,7 +45,7 @@ This will start both the backend and frontend of the application.
 If you need to to run the project in development mode. Follow the steps below:
 
 ```
-git clone https://github.com/MiraZzle/webik-crawler.git
+git clone https://github.com/MiraZzle/site-seeker.git
 ```
 
 #### Backend
@@ -56,7 +56,12 @@ git clone https://github.com/MiraZzle/webik-crawler.git
 cd backend
 ```
 
-2. Start the backend server:
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the backend server:
 
 ```bash
 node src/server.mjs
@@ -70,13 +75,18 @@ node src/server.mjs
 cd frontend
 ```
 
-2. Start the development server:
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
 
 ```
 npm run dev
 ```
 
-Once the application is running, visit http://localhost followed by the port number you specified in the .env file (e.g., http://localhost:3000 for the backend or http://localhost:8080 for the frontend) to access the respective services.
+Once the application is running, visit http://localhost followed by the port number you specified in the .env file (e.g., http://localhost:3000 for the backend or http://localhost:5173 for the frontend) to access the respective services.
 
 ## Documentation and Wiki
 
