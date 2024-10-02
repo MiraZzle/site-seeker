@@ -21,6 +21,11 @@ BACKEND_PORT=3000
 FRONTEND_PORT=8080
 ```
 
+The `.env` file in `Frontend` has to contain localhost with the port specified as `FRONTEND_PORT` in the global `.env` file.
+```bash
+VITE_API_URL=http://localhost:3000
+```
+
 You can modify these values to suit your needs.
 
 ## Usage
