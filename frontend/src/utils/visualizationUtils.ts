@@ -3,10 +3,8 @@ import {
   type ApiResponseData,
   type GraphNode,
   type LinkNode,
-  type CrawledNode,
-  type WebsiteRecord
+  type CrawledNode
 } from "$types/visualizationTypes";
-import axios from "axios";
 
 export function applyLayout(cy: cytoscape.Core) {
   if (!cy) return;
@@ -198,47 +196,3 @@ export const cytoscapeStyles: cytoscape.Stylesheet[] = [
     }
   }
 ];
-
-export async function getWebsiteRecordsByNodeId(nodeId: string): Promise<WebsiteRecord[]> {
-  try {
-    const response = await axios.get(`http://localhost:3000/api/websiteRecords/nodes/${nodeId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching website records:", error);
-    throw error;
-  }
-}
-
-export async function getNodesByRecordId(record_id: string): Promise<ApiResponseData> {
-  const graphqlQuery = `
-	query GetNodesByRecordId($webPageIds: [ID!]) {
-		nodes(webPages: $webPageIds) {
-			id
-			title
-			url
-			crawlTime
-			links {
-				title
-				url
-			}
-			owner {
-				identifier
-				label
-				url
-			}
-		}
-    }`;
-
-  const response = await axios
-    .post("http://localhost:3000/graphql", {
-      query: graphqlQuery,
-      variables: { webPageIds: [record_id] },
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data from GraphQL API", error);
-    });
-  return response?.data;
-}

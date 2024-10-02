@@ -21,6 +21,7 @@
   import { onMount } from "svelte";
 
   import { fetchWebsiteRecords } from "$lib/api/records";
+  import { fetchStartExecution } from "$lib/api/executions";
 
   let websiteRecords: WebRecord[] = [];
   let filteredWebsiteRecords: WebRecord[] = [];
@@ -81,30 +82,7 @@
   async function showExecutionModal(websiteRecordId: number) {
     chosenRecordForExecution = websiteRecordId;
     executionModalVisible = true;
-
-    try {
-      // Send POST request to backend
-      const response = await fetch(
-        `http://localhost:3000/api/websiteRecords/start/${websiteRecordId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-      // Check if the request was successful
-      if (!response.ok) {
-        throw new Error("Failed to start execution");
-      }
-
-      // Handle success (e.g., show a notification or log)
-      console.log(`Execution of Record ${websiteRecordId} started successfully!`);
-    } catch (error) {
-      // Handle error (e.g., show an error message or log)
-      console.error("Error starting execution:", error);
-    }
+    await fetchStartExecution(websiteRecordId);
   }
 
   function addTag(tagName: string) {

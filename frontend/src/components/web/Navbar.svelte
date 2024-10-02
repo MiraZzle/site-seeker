@@ -1,6 +1,7 @@
 <script lang="ts">
   import Logo from "$components/utils/Logo.svelte";
   import GithubButton from "$components/utils/GithubButton.svelte";
+  import { apiDocsHref } from "$lib/api/navigation";
 
   export let activePage: "Home" | "Records" | "Executor" | "Api" | "" = "Home";
 </script>
@@ -14,11 +15,7 @@
         <a class="nav-link {activePage === 'Records' ? 'active' : ''}" href="/records">Records</a>
         <a class="nav-link {activePage === 'Executor' ? 'active' : ''}" href="/executor">Executor</a
         >
-        <a
-          class="nav-link {activePage === 'Api' ? 'active' : ''}"
-          href="http://localhost:3000/api-docs/"
-          target="_blank">API</a
-        >
+        <a class="nav-link {activePage === 'Api' ? 'active' : ''}" href={apiDocsHref} target="_blank">API</a>
       </div>
       <GithubButton />
     </div>

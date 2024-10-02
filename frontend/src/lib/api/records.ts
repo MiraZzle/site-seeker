@@ -1,5 +1,7 @@
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export async function fetchWebsiteRecords() {
-  const response = await fetch("http://localhost:3000/api/websiteRecords", {
+  const response = await fetch(`${apiUrl}/api/websiteRecords`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json"
