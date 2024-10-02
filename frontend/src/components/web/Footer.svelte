@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { apiDocsHref } from "$lib/api/navigation";
 </script>
 
 <footer class="footer">
   <div class="footer-links">
     <a href="/">Home</a>
-    <a href="/">API</a>
+    <a href={apiDocsHref} target="_blank">API</a>
     <a href="/">GitHub</a>
   </div>
 </footer>

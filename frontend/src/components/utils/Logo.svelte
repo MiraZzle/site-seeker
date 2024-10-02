@@ -2,7 +2,7 @@
   import Icon from "$components/utils/icons/Icon.svelte";
 </script>
 
-<a href="/web/home" class="logo-container">
+<a href="/" class="logo-container">
   <Icon />
   <span class="logo-name">SiteSeeker</span>
 </a>
