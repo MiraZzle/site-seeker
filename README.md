@@ -1,10 +1,16 @@
 <img src="_static/title.svg" alt="alt text" width="300" height="auto" style="margin-bottom: 16px;">
 
+![Version Badge](https://img.shields.io/badge/version-1.0.0-blue?style=flat)
+![Contributors Badge](https://img.shields.io/badge/contributors-3-green?style=flat)
+![License Badge](https://img.shields.io/badge/license-MIT-red?style=flat)
+
 ![Svelte](https://img.shields.io/badge/svelte-%23f1413d.svg?style=for-the-badge&logo=svelte&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+
+## About
 
 SiteSeeker is a minimalist web crawler designed for constructing detailed website graphs and extracting link information. The app supports parallel web scraping to ensure efficient and scalable data extraction.
 
@@ -12,7 +18,8 @@ SiteSeeker is a minimalist web crawler designed for constructing detailed websit
 
 ## Prerequisites
 
-To run the application, you will need Docker installed.
+> [!WARNING]
+> To run the application, you will need Docker installed.
 
 You can specify custom environment variables in the .env file located at the root of the project. By default, the following ports are used for backend:
 
