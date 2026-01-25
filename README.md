@@ -14,8 +14,6 @@
 
 SiteSeeker is a minimalist web crawler designed for constructing detailed website graphs and extracting link information. The app supports parallel web scraping to ensure efficient and scalable data extraction.
 
----
-
 ## Prerequisites
 
 > [!WARNING]
